@@ -6,6 +6,12 @@
   var COOKIE_NAME = cfg.name || "illow-consent-d65e161a-df13-4344-bde3-d7e22f62d93c";
   var COOKIE_DAYS = typeof cfg.days==="number" ? cfg.days : 180;
 
+  // Emoji in Unicode
+  var emojiCookie = "\u{1F36A}"; // 🍪
+  var emojiWrench = "\u{1F527}"; // 🛠
+  var emojiPage   = "\u{1F4C4}"; // 📄
+  var emojiCross  = "\u274C";    // ❌
+
   // ======= UTILS =======
   function setCookie(n, v, days){
     var e=""; if(days){var d=new Date(); d.setTime(d.getTime()+days*864e5); e="; expires="+d.toUTCString();}
@@ -18,7 +24,6 @@
   }
   function pushConsentEvent(){ window.dataLayer=window.dataLayer||[]; window.dataLayer.push({event:"illow_consent"}); }
 
-  // Se consenso presente: uscita
   if (getCookie(COOKIE_NAME)) return;
 
   // ======= STYLE =======
@@ -37,7 +42,6 @@
   #cc-close{position:absolute;top:6px;right:10px;background:transparent;border:0;font-size:18px;cursor:pointer}
   #cc-links{font-size:12px;margin-top:6px}
   #cc-links a{color:#2e7d32;text-decoration:underline;margin-right:8px}
-
   #cc-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100002;background:rgba(0,0,0,.6)}
   #cc-card{background:#fff;color:#111;max-width:520px;width:92%;border-radius:10px;padding:16px}
   #cc-card h3{margin:0 0 8px}
@@ -52,12 +56,12 @@
   var backdrop = document.createElement("div"); backdrop.id="cc-backdrop";
   var banner   = document.createElement("div"); banner.id="cc-banner";
   banner.innerHTML = `
-    <button id="cc-close" aria-label="Chiudi">?</button>
-    <h3>Questo sito utilizza cookies per migliorare l�esperienza.</h3>
-    <p>?? Usiamo cookies per analisi del traffico, annunci e funzioni social.</p>
-    <p>?? Per funzioni complete, si pu� consentire tutti i cookies in conformit� alla policy.</p>
-    <p>?? Preferenze modificabili in qualsiasi momento.</p>
-    <p>? Chiudendo con la X restano attivi solo quelli tecnici.</p>
+    <button id="cc-close" aria-label="Chiudi">✖</button>
+    <h3>Questo sito utilizza cookies per migliorare l'esperienza.</h3>
+    <p>${emojiCookie} Usiamo cookies per analisi del traffico, annunci e funzioni social.</p>
+    <p>${emojiWrench} Per funzioni complete, si può consentire tutti i cookies in conformità alla policy.</p>
+    <p>${emojiPage} Preferenze modificabili in qualsiasi momento.</p>
+    <p>${emojiCross} Chiudendo con la X restano attivi solo quelli tecnici.</p>
     <div id="cc-actions">
       <button id="cc-manage">Gestisci le impostazioni</button>
       <button id="cc-accept">Accetta tutti</button>
@@ -99,4 +103,3 @@
     store(m,s); closeAll();
   });
 })();
-// JavaScript Document
