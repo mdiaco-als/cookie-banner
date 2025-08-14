@@ -6,12 +6,6 @@
   var COOKIE_NAME = cfg.name || "illow-consent-d65e161a-df13-4344-bde3-d7e22f62d93c";
   var COOKIE_DAYS = typeof cfg.days==="number" ? cfg.days : 180;
 
-  // Emoji in Unicode
-  var emojiCookie = "\u{1F36A}"; // 🍪
-  var emojiWrench = "\u{1F527}"; // 🛠
-  var emojiPage   = "\u{1F4C4}"; // 📄
-  var emojiCross  = "\u274C";    // ❌
-
   // ======= UTILS =======
   function setCookie(n, v, days){
     var e=""; if(days){var d=new Date(); d.setTime(d.getTime()+days*864e5); e="; expires="+d.toUTCString();}
@@ -24,9 +18,16 @@
   }
   function pushConsentEvent(){ window.dataLayer=window.dataLayer||[]; window.dataLayer.push({event:"illow_consent"}); }
 
+  // Se già presente consenso, esci
   if (getCookie(COOKIE_NAME)) return;
 
-  // ======= STYLE =======
+  // ======= ICONS (SVG inline) =======
+  var icoCookie = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10a4 4 0 0 1-4-4a4 4 0 0 1-4-4Z"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="10.5" cy="16" r="1" fill="#fff"/></svg>';
+  var icoWrench = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 7.46a5 5 0 0 1-6.53 6.53l-7.2 7.2a2 2 0 0 1-2.83 0l-1.63-1.63a2 2 0 0 1 0-2.83l7.2-7.2A5 5 0 0 1 22 7.46Z"/></svg>';
+  var icoPage   = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path fill="currentColor" d="M14 2v6h6"/></svg>';
+  var icoCross  = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m6 6l12 12M18 6L6 18"/></svg>';
+
+  // ======= STILE =======
   var css = `
   #cc-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.25);
     backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
@@ -34,7 +35,7 @@
     border-top:4px solid #2e7d32;box-shadow:0 -2px 8px rgba(0,0,0,.2);padding:16px;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
   #cc-banner h3{margin:0 0 8px;color:#2e7d32;font-size:18px}
-  #cc-banner p{margin:6px 0;font-size:14px;line-height:1.45}
+  #cc-banner p{margin:6px 0;font-size:14px;line-height:1.45;display:flex;gap:6px;align-items:flex-start}
   #cc-actions{margin-top:8px}
   #cc-actions button{padding:8px 12px;margin:4px;border-radius:8px;border:0;font-weight:700;cursor:pointer}
   #cc-accept{background:#2e7d32;color:#fff}
@@ -58,10 +59,10 @@
   banner.innerHTML = `
     <button id="cc-close" aria-label="Chiudi">✖</button>
     <h3>Questo sito utilizza cookies per migliorare l'esperienza.</h3>
-    <p>${emojiCookie} Usiamo cookies per analisi del traffico, annunci e funzioni social.</p>
-    <p>${emojiWrench} Per funzioni complete, si può consentire tutti i cookies in conformità alla policy.</p>
-    <p>${emojiPage} Preferenze modificabili in qualsiasi momento.</p>
-    <p>${emojiCross} Chiudendo con la X restano attivi solo quelli tecnici.</p>
+    <p>${icoCookie}<span>Usiamo cookies per analisi del traffico, annunci e funzioni social.</span></p>
+    <p>${icoWrench}<span>Per funzioni complete, è possibile consentire tutti i cookies in conformità alla policy.</span></p>
+    <p>${icoPage}<span>Preferenze modificabili in qualsiasi momento.</span></p>
+    <p>${icoCross}<span>Chiusura con la X lascia attivi solo quelli tecnici.</span></p>
     <div id="cc-actions">
       <button id="cc-manage">Gestisci le impostazioni</button>
       <button id="cc-accept">Accetta tutti</button>
@@ -92,14 +93,26 @@
   // ======= LOGICA =======
   function store(mark, stat){ setCookie(COOKIE_NAME, "marketing="+mark+"&statistics="+stat, COOKIE_DAYS); pushConsentEvent(); }
   function closeAll(){ banner.remove(); backdrop.remove(); modal.remove(); }
+  function showModal(){ modal.style.display="flex"; }
+  function hideModal(){ modal.style.display="none"; }
 
   document.getElementById("cc-accept").addEventListener("click", function(){ store(true,true); closeAll(); });
   document.getElementById("cc-close").addEventListener("click",  function(){ store(false,false); closeAll(); });
-  document.getElementById("cc-manage").addEventListener("click", function(){ modal.style.display="flex"; });
-  document.getElementById("cc-cancel").addEventListener("click", function(){ modal.style.display="none"; });
+  document.getElementById("cc-manage").addEventListener("click", showModal);
+  document.getElementById("cc-cancel").addEventListener("click", hideModal);
   document.getElementById("cc-save").addEventListener("click",   function(){
     var m = document.getElementById("cc-marketing").checked;
     var s = document.getElementById("cc-statistics").checked;
     store(m,s); closeAll();
   });
+
+  // API per riaprire preferenze dal footer
+  window.CC_openConsent = function(){
+    // se consenso già presente, mostra solo il modal
+    if (getCookie(COOKIE_NAME)) { document.body.appendChild(modal); showModal(); }
+  };
 })();
+
+  });
+})();
+
