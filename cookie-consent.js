@@ -10,6 +10,7 @@
     var COOKIE_URL  = cfg.cookie  || "#";
     var COOKIE_NAME = cfg.name || "illow-consent-d65e161a-df13-4344-bde3-d7e22f62d93c";
     var COOKIE_DAYS = (typeof cfg.days === "number") ? cfg.days : 180;
+    var OPEN_DOCS_IN_MODAL = (typeof cfg.openDocsInModal === "boolean") ? cfg.openDocsInModal : true;
 
     // ======= UTILS =======
     function setCookie(n, v, days) {
@@ -169,3 +170,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
