@@ -70,7 +70,13 @@
       + ".cc-row{display:flex;align-items:center;gap:8px;margin:8px 0}"
       + ".cc-row input{transform:scale(1.2)}"
       + "#cc-save{background:#2e7d32;color:#fff;padding:8px 12px;border:0;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px}"
-      + "#cc-cancel{background:#e0e0e0;padding:8px 12px;border:0;border-radius:8px;cursor:pointer}";
+      + "#cc-cancel{background:#e0e0e0;padding:8px 12px;border:0;border-radius:8px;cursor:pointer}"
+      + "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}"
+      + "#cc-docs-card{background:#fff;color:#111;max-width:900px;width:96%;height:80vh;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}"
+      + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eee;font-weight:700}"
+      + "#cc-docs-iframe{flex:1;width:100%;border:0}"
+      + "#cc-docs-close{background:#e0e0e0;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}";
+
 
     var style = document.createElement("style");
     style.textContent = css;
@@ -82,6 +88,50 @@
 
     var banner = document.createElement("div");
     banner.id = "cc-banner";
+    // Creazione finestra modale documenti (Privacy/Cookie)
+var docsOverlay = document.createElement("div");
+docsOverlay.id = "cc-docs";
+docsOverlay.innerHTML = `
+  <div id="cc-docs-card">
+    <div id="cc-docs-head">
+      <span id="cc-docs-title">Documento</span>
+      <button id="cc-docs-close">Chiudi</button>
+    </div>
+    <iframe id="cc-docs-iframe"></iframe>
+  </div>
+`;
+document.body.appendChild(docsOverlay);
+
+// Funzione per aprire la modale
+function openDocs(title, url) {
+  document.getElementById("cc-docs-title").textContent = title;
+  document.getElementById("cc-docs-iframe").src = url;
+  document.getElementById("cc-docs").style.display = "flex";
+}
+
+// Funzione per chiudere la modale
+document.getElementById("cc-docs-close").addEventListener("click", function() {
+  document.getElementById("cc-docs").style.display = "none";
+  // riapre il banner cookie
+  document.getElementById("cc-banner").style.display = "block";
+});
+function openDocs(title, url) {
+  document.getElementById("cc-docs-title").textContent = title;
+  document.getElementById("cc-docs-iframe").src = url;
+  document.getElementById("cc-docs").style.display = "flex";
+  banner.style.display = "none"; // ← nasconde il banner mentre si legge la policy
+}
+document.getElementById("cc-docs-close").addEventListener("click", function() {
+  const docs = document.getElementById("cc-docs");
+  const ifr  = document.getElementById("cc-docs-iframe");
+  ifr.removeAttribute("src");     // ← svuota
+  docs.style.display = "none";
+  document.getElementById("cc-banner").style.display = "block";
+});
+<iframe id="cc-docs-iframe"
+  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+  referrerpolicy="no-referrer"></iframe>
+
     banner.innerHTML =
       '<button id="cc-close" aria-label="Chiudi">✖</button>'
       + '<h3>Questo sito utilizza cookies per migliorare l\'esperienza.</h3>'
@@ -170,4 +220,5 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
