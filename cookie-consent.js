@@ -11,6 +11,27 @@
     var COOKIE_NAME = cfg.name || "illow-consent-d65e161a-df13-4344-bde3-d7e22f62d93c";
     var COOKIE_DAYS = (typeof cfg.days === "number") ? cfg.days : 180;
     var OPEN_DOCS_IN_MODAL = (typeof cfg.openDocsInModal === "boolean") ? cfg.openDocsInModal : true;
+    
+// --- SKIP CONDITIONS: no banner inside iframe or policy pages ---
+var SKIP_IFRAME = true;
+// Puoi personalizzare via CC_CONFIG.skipPaths = ["privacy", "cookie", "/policy/...]"]
+var SKIP_PATHS = (Array.isArray(cfg.skipPaths) && cfg.skipPaths.length)
+  ? cfg.skipPaths.map(function (p) { return new RegExp(p, "i"); })
+  : [/privacy/i, /cookie/i];
+
+// 1) Non eseguire se caricati dentro un iframe (es. modale documenti)
+if (SKIP_IFRAME && window.top !== window.self) {
+  console.log("[cookie-consent] in iframe -> skip");
+  return;
+}
+
+// 2) Non eseguire su pagine policy reali
+for (var i = 0; i < SKIP_PATHS.length; i++) {
+  if (SKIP_PATHS[i].test(location.pathname)) {
+    console.log("[cookie-consent] policy page -> skip");
+    return;
+  }
+}
 
     // ======= UTILS =======
     function setCookie(n, v, days) {
@@ -220,3 +241,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
