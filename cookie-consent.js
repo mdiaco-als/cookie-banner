@@ -92,11 +92,12 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       + ".cc-row input{transform:scale(1.2)}"
       + "#cc-save{background:#2e7d32;color:#fff;padding:8px 12px;border:0;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px}"
       + "#cc-cancel{background:#e0e0e0;padding:8px 12px;border:0;border-radius:8px;cursor:pointer}"
-      + "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}"
-      + "#cc-docs-card{background:#fff;color:#111;max-width:900px;width:96%;height:80vh;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}"
-      + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eee;font-weight:700}"
-      + "#cc-docs-iframe{flex:1;width:100%;border:0}"
-      + "#cc-docs-close{background:#e0e0e0;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}";
+      + "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;overflow:hidden}"
+      + "#cc-docs-card{background:#fff;color:#111;box-sizing:border-box;width:min(96vw,1200px);height:min(92vh,1000px);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}"
+      + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #eee;font-weight:700;flex:0 0 44px}"
+      + "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0}"
+      + "#cc-docs-close{background:#e0e0e0;border:0;border-radius:8px;padding:6px 10px;cursor:pointer;flex:0 0 auto}"
+      + "@media (max-width:640px){#cc-docs-card{width:100vw;height:100dvh;border-radius:0}}";
 
     var style = document.createElement("style");
     style.textContent = css;
@@ -185,9 +186,26 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       if (!OPEN_DOCS_IN_MODAL) { window.open(url, "_blank", "noopener"); return; }
       document.getElementById("cc-docs-title").textContent = title || "Informativa";
       document.getElementById("cc-docs-iframe").src = url;
+      // dopo: document.getElementById("cc-docs-iframe").src = url;
+var ifr = document.getElementById("cc-docs-iframe");
+ifr.onload = function () {
+  try {
+    var d = ifr.contentDocument || ifr.contentWindow.document;
+    var s = d.createElement("style");
+    s.textContent =
+      "html,body{max-width:100%;overflow-x:auto!important}" +
+      "img,video,iframe,table{max-width:100%;height:auto}" +
+      ".container,.wrap,.content{max-width:100%!important}";
+    d.head && d.head.appendChild(s);
+  } catch(e) {
+    // se cross-origin, ignora: non serve (apriamo comunque bene).
+  }
+};
       banner.style.display = "none";
       docsOverlay.style.display = "flex";
       backdrop.style.display = "block";
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     }
     function closeDocs(){
       var ifr = document.getElementById("cc-docs-iframe");
@@ -195,6 +213,8 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       docsOverlay.style.display = "none";
       banner.style.display = "block";
       backdrop.style.display = "block";
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
     }
 
     function wire() {
@@ -241,4 +261,5 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
