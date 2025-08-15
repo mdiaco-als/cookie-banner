@@ -1,4 +1,4 @@
-// cookie-consent.js — SVG icons, modal docs, blur, GTM event, no emoji
+// cookie-consent.js — banner centrato, SVG icons, modale docs responsive, GTM event
 (function () {
   "use strict";
   try {
@@ -8,30 +8,27 @@
     var cfg = (window.CC_CONFIG || {});
     var PRIVACY_URL = cfg.privacy || "#";
     var COOKIE_URL  = cfg.cookie  || "#";
+    var DATA_REQUEST_URL = cfg.dataRequest || null; // terzo link opzionale
     var COOKIE_NAME = cfg.name || "illow-consent-d65e161a-df13-4344-bde3-d7e22f62d93c";
     var COOKIE_DAYS = (typeof cfg.days === "number") ? cfg.days : 180;
     var OPEN_DOCS_IN_MODAL = (typeof cfg.openDocsInModal === "boolean") ? cfg.openDocsInModal : true;
-    
-// --- SKIP CONDITIONS: no banner inside iframe or policy pages ---
-var SKIP_IFRAME = true;
-// Puoi personalizzare via CC_CONFIG.skipPaths = ["privacy", "cookie", "/policy/...]"]
-var SKIP_PATHS = (Array.isArray(cfg.skipPaths) && cfg.skipPaths.length)
-  ? cfg.skipPaths.map(function (p) { return new RegExp(p, "i"); })
-  : [/privacy/i, /cookie/i];
 
-// 1) Non eseguire se caricati dentro un iframe (es. modale documenti)
-if (SKIP_IFRAME && window.top !== window.self) {
-  console.log("[cookie-consent] in iframe -> skip");
-  return;
-}
+    // --- SKIP: inside iframe or on policy pages ---
+    var SKIP_IFRAME = true;
+    var SKIP_PATHS = (Array.isArray(cfg.skipPaths) && cfg.skipPaths.length)
+      ? cfg.skipPaths.map(function (p) { return new RegExp(p, "i"); })
+      : [/privacy/i, /cookie/i, /cookie-policy/i];
 
-// 2) Non eseguire su pagine policy reali
-for (var i = 0; i < SKIP_PATHS.length; i++) {
-  if (SKIP_PATHS[i].test(location.pathname)) {
-    console.log("[cookie-consent] policy page -> skip");
-    return;
-  }
-}
+    if (SKIP_IFRAME && window.top !== window.self) {
+      console.log("[cookie-consent] in iframe -> skip");
+      return;
+    }
+    for (var i = 0; i < SKIP_PATHS.length; i++) {
+      if (SKIP_PATHS[i].test(location.pathname)) {
+        console.log("[cookie-consent] policy page -> skip");
+        return;
+      }
+    }
 
     // ======= UTILS =======
     function setCookie(n, v, days) {
@@ -45,8 +42,8 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
     }
     function getCookie(n) {
       var k = n + "=", arr = document.cookie.split(";");
-      for (var i = 0; i < arr.length; i++) {
-        var c = arr[i].trim();
+      for (var i2 = 0; i2 < arr.length; i2++) {
+        var c = arr[i2].trim();
         if (c.indexOf(k) === 0) return decodeURIComponent(c.substring(k.length));
       }
       return null;
@@ -63,7 +60,7 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       return;
     }
 
-    // ======= ICONS (SVG inline) =======
+    // ======= ICONS (SVG inline, niente emoji) =======
     var icoCookie = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10a4 4 0 0 1-4-4a4 4 0 0 1-4-4Z"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="10.5" cy="16" r="1" fill="#fff"/></svg>';
     var icoWrench = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 7.46a5 5 0 0 1-6.53 6.53l-7.2 7.2a2 2 0 0 1-2.83 0l-1.63-1.63a2 2 0 0 1 0-2.83l7.2-7.2A5 5 0 0 1 22 7.46Z"/></svg>';
     var icoPage   = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path fill="currentColor" d="M14 2v6h6"/></svg>';
@@ -71,20 +68,22 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
 
     // ======= CSS =======
     var css = ""
-      + "#cc-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.25);"
-      + "backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}"
-      + "#cc-banner{position:fixed;left:0;right:0;bottom:0;z-index:100001;background:#fff;color:#111;"
-      + "border-top:4px solid #2e7d32;box-shadow:0 -2px 8px rgba(0,0,0,.2);padding:16px;"
-      + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}"
+      + "#cc-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none}"
+      // Banner come card centrata
+      + "#cc-banner{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100001;"
+      + "background:#fff;color:#111;border-top:4px solid #2e7d32;box-shadow:0 10px 30px rgba(0,0,0,.25);"
+      + "padding:16px;border-radius:16px;width:min(720px,92vw);max-height:86vh;overflow:auto;"
+      + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;display:none}"
       + "#cc-banner h3{margin:0 0 8px;color:#2e7d32;font-size:18px}"
       + "#cc-banner p{margin:6px 0;font-size:14px;line-height:1.45;display:flex;gap:6px;align-items:flex-start}"
-      + "#cc-actions{margin-top:8px}"
+      + "#cc-actions{margin-top:8px;display:flex;flex-wrap:wrap}"
       + "#cc-actions button{padding:8px 12px;margin:4px;border-radius:8px;border:0;font-weight:700;cursor:pointer}"
       + "#cc-accept{background:#2e7d32;color:#fff}"
       + "#cc-manage{background:#e0e0e0}"
       + "#cc-close{position:absolute;top:6px;right:10px;background:transparent;border:0;font-size:18px;cursor:pointer}"
       + "#cc-links{font-size:12px;margin-top:6px}"
-      + "#cc-links a{color:#2e7d32;text-decoration:underline;margin-right:8px}"
+      + "#cc-links a{color:#2e7d32;text-decoration:underline;margin-right:12px}"
+      // Modale preferenze
       + "#cc-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100002;background:rgba(0,0,0,.6)}"
       + "#cc-card{background:#fff;color:#111;max-width:520px;width:92%;border-radius:10px;padding:16px}"
       + "#cc-card h3{margin:0 0 8px}"
@@ -92,6 +91,7 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       + ".cc-row input{transform:scale(1.2)}"
       + "#cc-save{background:#2e7d32;color:#fff;padding:8px 12px;border:0;border-radius:8px;font-weight:700;cursor:pointer;margin-right:8px}"
       + "#cc-cancel{background:#e0e0e0;padding:8px 12px;border:0;border-radius:8px;cursor:pointer}"
+      // Modale documenti responsive
       + "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;overflow:hidden}"
       + "#cc-docs-card{background:#fff;color:#111;box-sizing:border-box;width:min(96vw,1200px);height:min(92vh,1000px);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}"
       + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #eee;font-weight:700;flex:0 0 44px}"
@@ -123,23 +123,27 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       + '</div>'
     );
 
+    // === Contenuto banner (stesso testo dello screenshot) ===
     banner.innerHTML = (
       '<button id="cc-close" aria-label="Chiudi">✖</button>'
-      + '<h3>Questo sito utilizza cookies per migliorare l\'esperienza.</h3>'
-      + '<p>' + icoCookie + '<span>Usiamo cookies per analisi del traffico, annunci e funzioni social.</span></p>'
-      + '<p>' + icoWrench + '<span>Per funzioni complete, è possibile consentire tutti i cookies in conformità alla policy.</span></p>'
-      + '<p>' + icoPage   + '<span>Preferenze modificabili in qualsiasi momento.</span></p>'
-      + '<p>' + icoCross  + '<span>Chiusura con la X lascia attivi solo quelli tecnici.</span></p>'
+      + '<h3>Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
+      + '<p>' + icoCookie + '<span>Utilizziamo i cookies per analizzare il traffico, mostrarti annunci personalizzati su siti di terze parti e fornirti funzionalità relative ai social media.</span></p>'
+      + '<p>' + icoWrench + '<span>Per fruire senza limiti delle funzionalità offerte da ALIMENTIAMO LA SALUTE, ti invitiamo a consentire tutti i cookies in CONFORMITÀ con la nostra POLICY per i COOKIES.</span></p>'
+      + '<p>' + icoPage   + '<span>Puoi modificare le tue preferenze in qualsiasi momento accedendo alle impostazioni sui cookies.</span></p>'
+      + '<p>' + icoPage   + '<span>Per maggiori dettagli, leggi la nostra Cookie Policy e la nostra Privacy Policy.</span></p>'
+      + '<p>' + icoCross  + '<span>Chiudendo questo banner con la X, verranno mantenuti solo i cookie tecnici necessari per il funzionamento del sito.</span></p>'
+      + '<div id="cc-links">'
+      +   '<a id="cc-privacy" href="' + PRIVACY_URL + '">Informativa sulla privacy</a>'
+      +   '<a id="cc-cookie"  href="' + COOKIE_URL  + '">Informativa sui cookie</a>'
+      +   (DATA_REQUEST_URL ? '<a id="cc-data" href="' + DATA_REQUEST_URL + '">Richiesta dei tuoi dati</a>' : '')
+      + '</div>'
       + '<div id="cc-actions">'
       +   '<button id="cc-manage">Gestisci le impostazioni</button>'
       +   '<button id="cc-accept">Accetta tutti</button>'
       + '</div>'
-      + '<div id="cc-links">'
-      +   '<a id="cc-privacy" href="' + PRIVACY_URL + '">Informativa sulla privacy</a>'
-      +   '<a id="cc-cookie"  href="' + COOKIE_URL  + '">Informativa sui cookie</a>'
-      + '</div>'
     );
 
+    // Modale preferenze
     var modal = document.createElement("div");
     modal.id = "cc-modal";
     modal.innerHTML = (
@@ -162,6 +166,11 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
         document.body.appendChild(modal);
         document.body.appendChild(docsOverlay);
         wire();
+        // mostra overlay e banner; blocca scroll pagina
+        backdrop.style.display = "block";
+        banner.style.display = "block";
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
       } else {
         document.addEventListener("DOMContentLoaded", mount, { once: true });
       }
@@ -173,6 +182,9 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
       pushConsentEvent();
     }
     function closeAll() {
+      // ripristina scroll e rimuove UI
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
       try { banner.remove(); }   catch(e){ if (banner.parentNode)   banner.parentNode.removeChild(banner); }
       try { backdrop.remove(); } catch(e){ if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop); }
       try { modal.remove(); }    catch(e){ if (modal.parentNode)    modal.parentNode.removeChild(modal); }
@@ -185,25 +197,24 @@ for (var i = 0; i < SKIP_PATHS.length; i++) {
     function openDocs(url, title){
       if (!OPEN_DOCS_IN_MODAL) { window.open(url, "_blank", "noopener"); return; }
       document.getElementById("cc-docs-title").textContent = title || "Informativa";
-      document.getElementById("cc-docs-iframe").src = url;
-      // dopo: document.getElementById("cc-docs-iframe").src = url;
-var ifr = document.getElementById("cc-docs-iframe");
-ifr.onload = function () {
-  try {
-    var d = ifr.contentDocument || ifr.contentWindow.document;
-    var s = d.createElement("style");
-    s.textContent =
-      "html,body{max-width:100%;overflow-x:auto!important}" +
-      "img,video,iframe,table{max-width:100%;height:auto}" +
-      ".container,.wrap,.content{max-width:100%!important}";
-    d.head && d.head.appendChild(s);
-  } catch(e) {
-    // se cross-origin, ignora: non serve (apriamo comunque bene).
-  }
-};
+      var ifr = document.getElementById("cc-docs-iframe");
+      ifr.src = url;
+      // anti-taglio dentro iframe (se stesso dominio)
+      ifr.onload = function () {
+        try {
+          var d = ifr.contentDocument || ifr.contentWindow.document;
+          var s = d.createElement("style");
+          s.textContent =
+            "html,body{max-width:100%;overflow-x:auto!important}" +
+            "img,video,iframe,table{max-width:100%;height:auto}" +
+            ".container,.wrap,.content{max-width:100%!important}";
+          d.head && d.head.appendChild(s);
+        } catch(e) {/* cross-origin: ignora */}
+      };
       banner.style.display = "none";
       docsOverlay.style.display = "flex";
       backdrop.style.display = "block";
+      // blocca scroll sotto la modale
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
     }
@@ -213,8 +224,9 @@ ifr.onload = function () {
       docsOverlay.style.display = "none";
       banner.style.display = "block";
       backdrop.style.display = "block";
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
+      // lascia scroll bloccato finché c'è il banner
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     }
 
     function wire() {
@@ -237,15 +249,26 @@ ifr.onload = function () {
         closeAll();
       });
 
-      // Link privacy/cookie → modale
+      // Link privacy/cookie → modale (o nuova scheda se OPEN_DOCS_IN_MODAL=false)
       document.getElementById("cc-privacy").addEventListener("click", function(e){
         e.preventDefault(); openDocs(PRIVACY_URL, "Informativa sulla privacy");
       });
       document.getElementById("cc-cookie").addEventListener("click", function(e){
         e.preventDefault(); openDocs(COOKIE_URL, "Informativa sui cookie");
       });
+      if (DATA_REQUEST_URL) {
+        document.getElementById("cc-data").addEventListener("click", function(e){
+          e.preventDefault(); openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
+        });
+      }
+
       // Chiudi modale documenti
       document.getElementById("cc-docs-close").addEventListener("click", closeDocs);
+      // Chiudi clic overlay o ESC
+      docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) closeDocs(); });
+      document.addEventListener("keydown", function(e){
+        if (e.key === "Escape" && docsOverlay.style.display === "flex") closeDocs();
+      });
 
       console.log("[cookie-consent] UI mounted");
     }
@@ -261,5 +284,3 @@ ifr.onload = function () {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
-
-
