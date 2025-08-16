@@ -142,7 +142,7 @@
       + '</div>'
     );
 
-    // Modale preferenze (aggiunta voce "Necessari" disabilitata)
+    // Modale preferenze (Necessari locked)
     var modal = document.createElement("div");
     modal.id = "cc-modal";
     modal.innerHTML = (
@@ -185,10 +185,45 @@
     function showFloat(){ floatBtn && (floatBtn.style.display = "inline-flex"); }
     function hideFloat(){ floatBtn && (floatBtn.style.display = "none"); }
 
-    // ======= LOGICA CONSENSO =======
+    // ======= CONSENT STATE =======
+    function readConsent() {
+      var v = getCookie(COOKIE_NAME);
+      var res = { marketing: false, statistics: false };
+      if (!v) return res;
+      // supporta sia querystring "marketing=true&statistics=true" sia JSON legacy
+      try {
+        if (v[0] === "{") {
+          var o = JSON.parse(v);
+          res.marketing  = !!(o.all || o.marketing);
+          res.statistics = !!(o.all || o.stats || o.statistics);
+          return res;
+        }
+      } catch(e){}
+      v.split("&").forEach(function (pair) {
+        var kv = pair.split("=");
+        if (kv.length === 2) {
+          var key = kv[0].trim().toLowerCase();
+          var val = kv[1].trim().toLowerCase();
+          if (key === "marketing")  res.marketing  = (val === "true" || val === "1");
+          if (key === "statistics") res.statistics = (val === "true" || val === "1");
+        }
+      });
+      return res;
+    }
+
+    function applyConsentToUI(consent) {
+      var m = document.getElementById("cc-marketing");
+      var s = document.getElementById("cc-statistics");
+      if (m) m.checked = !!consent.marketing;
+      if (s) s.checked = !!consent.statistics;
+      var nec = document.getElementById("cc-necessary");
+      if (nec) { nec.checked = true; nec.disabled = true; }
+    }
+
     function store(mark, stat) {
       setCookie(COOKIE_NAME, "marketing=" + mark + "&statistics=" + stat, COOKIE_DAYS);
       pushConsentEvent();
+      applyConsentToUI({ marketing: !!mark, statistics: !!stat }); // sincronizza subito la UI
     }
 
     // ======= MOUNT =======
@@ -205,8 +240,11 @@
         showFloat();
         hideBanner();
       });
-      // GESTISCI
-      document.getElementById("cc-manage").addEventListener("click", showModal);
+      // GESTISCI (sincronizza prima di aprire)
+      document.getElementById("cc-manage").addEventListener("click", function () {
+        applyConsentToUI(readConsent());
+        showModal();
+      });
       document.getElementById("cc-cancel").addEventListener("click", function(){ hideModal(); });
 
       // SALVA PREFERENZE
@@ -265,15 +303,19 @@
 
     function mount() {
       // inietta CSS + DOM una sola volta
+      document.head.appendChild(style);
       document.body.appendChild(backdrop);
       document.body.appendChild(banner);
       document.body.appendChild(modal);
       document.body.appendChild(docsOverlay);
       document.body.appendChild(floatBtn);
+
       wire();
 
-      // Se consenso già presente → mostra solo bottone
-      if (getCookie(COOKIE_NAME)) {
+      // Se consenso già presente → mostra solo bottone e sincronizza UI
+      var existing = getCookie(COOKIE_NAME);
+      if (existing) {
+        applyConsentToUI(readConsent());
         showFloat();
         console.log("[cookie-consent] cookie found, skipping banner");
         return;
