@@ -122,7 +122,7 @@
       + '</div>'
     );
 
-    // === Contenuto banner (il TUO testo originale, invariato) ===
+    // === Contenuto banner (TUO testo) ===
     banner.innerHTML = (
       '<button id="cc-close" aria-label="Chiudi">✖</button>'
       + '<h3>Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
@@ -142,12 +142,13 @@
       + '</div>'
     );
 
-    // Modale preferenze
+    // Modale preferenze (aggiunta voce "Necessari" disabilitata)
     var modal = document.createElement("div");
     modal.id = "cc-modal";
     modal.innerHTML = (
       '<div id="cc-card" role="dialog" aria-modal="true" aria-labelledby="cc-title">'
       +  '<h3 id="cc-title">Preferenze Cookie</h3>'
+      +  '<div class="cc-row"><input id="cc-necessary" type="checkbox" checked disabled><label for="cc-necessary">Necessari (sempre attivi)</label></div>'
       +  '<div class="cc-row"><input id="cc-marketing" type="checkbox"><label for="cc-marketing">Marketing</label></div>'
       +  '<div class="cc-row"><input id="cc-statistics" type="checkbox"><label for="cc-statistics">Statistiche</label></div>'
       +  '<div style="margin-top:8px">'
@@ -157,70 +158,90 @@
       + '</div>'
     );
 
-    // Bottone flottante per riaprire il BANNER o le PREFERENZE
+    // Bottone flottante per riaprire il BANNER
     var floatBtn = document.createElement("button");
     floatBtn.id = "cc-float";
     floatBtn.type = "button";
     floatBtn.setAttribute("aria-label", "Gestisci preferenze cookie");
     floatBtn.innerHTML = '<img alt="" src="https://global-files-nginx.builderall.com/da739884-a644-464d-b30b-7e2e5b966fbb/a60de57d4e84cb87174fb85c09720464b33a89b0d87e5298e03206d1eee707bc.svg">';
     floatBtn.addEventListener("click", function () {
-      // APRI il BANNER principale (come mi hai chiesto)
       window.CC_openConsent();
     });
 
-    // Inserimento nel body quando pronto
-    function mount() {
-      if (document.body) {
-        document.body.appendChild(backdrop);
-        document.body.appendChild(banner);
-        document.body.appendChild(modal);
-        document.body.appendChild(docsOverlay);
-        document.body.appendChild(floatBtn);
-        wire();
+    // ======= VISIBILITY HELPERS (niente rimozione dal DOM) =======
+    function show(el){ el.style.display = "block"; }
+    function hide(el){ el.style.display = "none"; }
 
-        // Se esiste già una decisione -> NON mostrare banner, ma mostrare il bottone
-        if (getCookie(COOKIE_NAME)) {
-          showFloat();
-          console.log("[cookie-consent] cookie found, skipping banner");
-          return;
-        }
+    function lockScroll(){ document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden"; }
+    function unlockScroll(){ document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
 
-        // mostra overlay e banner; blocca scroll pagina
-        backdrop.style.display = "block";
-        banner.style.display = "block";
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-      } else {
-        document.addEventListener("DOMContentLoaded", mount, { once: true });
-      }
-    }
+    function showBanner() { show(backdrop); show(banner); hide(modal); hide(docsOverlay); lockScroll(); }
+    function hideBanner() { hide(backdrop); hide(banner); unlockScroll(); }
+    function showModal()  { show(backdrop); hide(banner); hide(docsOverlay); show(modal); lockScroll(); }
+    function hideModal()  { hide(modal); hide(backdrop); unlockScroll(); }
+    function showDocs()   { show(backdrop); hide(banner); hide(modal); show(docsOverlay); lockScroll(); }
+    function hideDocs()   { hide(docsOverlay); show(banner); show(backdrop); lockScroll(); }
 
-    // ======= LOGICA =======
+    function showFloat(){ floatBtn && (floatBtn.style.display = "inline-flex"); }
+    function hideFloat(){ floatBtn && (floatBtn.style.display = "none"); }
+
+    // ======= LOGICA CONSENSO =======
     function store(mark, stat) {
-      // Salva le preferenze (Accetta tutti -> true,true)
       setCookie(COOKIE_NAME, "marketing=" + mark + "&statistics=" + stat, COOKIE_DAYS);
       pushConsentEvent();
     }
-    function closeAll() {
-      // ripristina scroll e rimuove UI banner/modali
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-      try { banner.remove(); }   catch(e){ if (banner.parentNode)   banner.parentNode.removeChild(banner); }
-      try { backdrop.remove(); } catch(e){ if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop); }
-      try { modal.remove(); }    catch(e){ if (modal.parentNode)    modal.parentNode.removeChild(modal); }
-      try { docsOverlay.remove(); } catch(e){ if (docsOverlay.parentNode) docsOverlay.parentNode.removeChild(docsOverlay); }
-      console.log("[cookie-consent] UI removed");
-    }
-    function showModal() { modal.style.display = "flex"; }
-    function hideModal() { modal.style.display = "none"; }
-    function showBanner() {
-      // ricrea overlay se necessario
-      if (!document.body.contains(backdrop)) document.body.appendChild(backdrop);
-      if (!document.body.contains(banner)) document.body.appendChild(banner);
-      backdrop.style.display = "block";
-      banner.style.display = "block";
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
+
+    // ======= MOUNT =======
+    function wire() {
+      // ACCETTA TUTTI -> marketing=true & statistics=true
+      document.getElementById("cc-accept").addEventListener("click", function () {
+        store(true, true);
+        showFloat();
+        hideBanner();
+      });
+      // X -> solo tecnici
+      document.getElementById("cc-close").addEventListener("click", function () {
+        store(false, false);
+        showFloat();
+        hideBanner();
+      });
+      // GESTISCI
+      document.getElementById("cc-manage").addEventListener("click", showModal);
+      document.getElementById("cc-cancel").addEventListener("click", function(){ hideModal(); });
+
+      // SALVA PREFERENZE
+      document.getElementById("cc-save").addEventListener("click", function () {
+        var m = document.getElementById("cc-marketing").checked;
+        var s = document.getElementById("cc-statistics").checked;
+        store(m, s);
+        showFloat();
+        hideModal();
+      });
+
+      // Link privacy/cookie → modale docs
+      document.getElementById("cc-privacy").addEventListener("click", function(e){
+        e.preventDefault(); openDocs(PRIVACY_URL, "Informativa sulla privacy");
+      });
+      document.getElementById("cc-cookie").addEventListener("click", function(e){
+        e.preventDefault(); openDocs(COOKIE_URL, "Informativa sui cookie");
+      });
+      if (DATA_REQUEST_URL) {
+        var dataLink = document.getElementById("cc-data");
+        if (dataLink) dataLink.addEventListener("click", function(e){
+          e.preventDefault(); openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
+        });
+      }
+
+      // Docs modal handlers
+      document.getElementById("cc-docs-close").addEventListener("click", function(){ hideDocs(); });
+      docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) hideDocs(); });
+      document.addEventListener("keydown", function(e){
+        if (e.key === "Escape") {
+          if (docsOverlay.style.display === "block") hideDocs();
+          else if (modal.style.display === "block") hideModal();
+          else if (banner.style.display === "block") hideBanner();
+        }
+      });
     }
 
     function openDocs(url, title){
@@ -239,88 +260,37 @@
           d.head && d.head.appendChild(s);
         } catch(e) {/* cross-origin: ignora */}
       };
-      banner.style.display = "none";
-      docsOverlay.style.display = "flex";
-      backdrop.style.display = "block";
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    }
-    function closeDocs(){
-      var ifr = document.getElementById("cc-docs-iframe");
-      if (ifr) ifr.removeAttribute("src");
-      docsOverlay.style.display = "none";
-      banner.style.display = "block";
-      backdrop.style.display = "block";
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
+      showDocs();
     }
 
-    function showFloat(){ floatBtn && (floatBtn.style.display = "inline-flex"); }
-    function hideFloat(){ floatBtn && (floatBtn.style.display = "none"); }
+    function mount() {
+      // inietta CSS + DOM una sola volta
+      document.body.appendChild(backdrop);
+      document.body.appendChild(banner);
+      document.body.appendChild(modal);
+      document.body.appendChild(docsOverlay);
+      document.body.appendChild(floatBtn);
+      wire();
 
-    function wire() {
-      // ACCETTA TUTTI -> imposta marketing=true & statistics=true
-      document.getElementById("cc-accept").addEventListener("click", function () {
-        store(true, true);
+      // Se consenso già presente → mostra solo bottone
+      if (getCookie(COOKIE_NAME)) {
         showFloat();
-        hideModal();
-        closeAll();
-      });
-      // CHIUDI con X -> solo tecnici (false,false)
-      document.getElementById("cc-close").addEventListener("click", function () {
-        store(false, false);
-        showFloat();
-        closeAll();
-      });
-      // GESTISCI -> apre preferenze
-      document.getElementById("cc-manage").addEventListener("click", showModal);
-      document.getElementById("cc-cancel").addEventListener("click", hideModal);
-      // SALVA PREFERENZE
-      document.getElementById("cc-save").addEventListener("click", function () {
-        var m = document.getElementById("cc-marketing").checked;
-        var s = document.getElementById("cc-statistics").checked;
-        store(m, s);
-        showFloat();
-        hideModal();
-        closeAll();
-      });
-
-      // Link privacy/cookie → modale (o nuova scheda)
-      document.getElementById("cc-privacy").addEventListener("click", function(e){
-        e.preventDefault(); openDocs(PRIVACY_URL, "Informativa sulla privacy");
-      });
-      document.getElementById("cc-cookie").addEventListener("click", function(e){
-        e.preventDefault(); openDocs(COOKIE_URL, "Informativa sui cookie");
-      });
-      if (DATA_REQUEST_URL) {
-        var dataLink = document.getElementById("cc-data");
-        if (dataLink) dataLink.addEventListener("click", function(e){
-          e.preventDefault(); openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
-        });
+        console.log("[cookie-consent] cookie found, skipping banner");
+        return;
       }
-
-      // Chiudi modale documenti
-      document.getElementById("cc-docs-close").addEventListener("click", closeDocs);
-      docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) closeDocs(); });
-      document.addEventListener("keydown", function(e){
-        if (e.key === "Escape" && docsOverlay.style.display === "flex") closeDocs();
-      });
-
-      console.log("[cookie-consent] UI mounted");
+      // Altrimenti mostra banner
+      showBanner();
     }
 
-    // Monta
-    mount();
+    // API per riaprire il BANNER principale
+    window.CC_openConsent = function () { showBanner(); };
 
-    // API per riaprire il BANNER dal footer / logo flottante
-    window.CC_openConsent = function () {
-      showBanner();
-    };
-    // API opzionale per riaprire direttamente le PREFERENZE
-    window.CC_openPreferences = function () {
-      if (!document.body.contains(modal)) document.body.appendChild(modal);
-      showModal();
-    };
+    // Ready
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mount, { once: true });
+    } else {
+      mount();
+    }
 
   } catch (err) {
     console.error("[cookie-consent] fatal error:", err);
