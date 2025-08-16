@@ -177,12 +177,14 @@
 
     function showBanner() { show(backdrop); show(banner); hide(modal); hide(docsOverlay); lockScroll(); }
     function hideBanner() { hide(backdrop); hide(banner); unlockScroll(); }
-    function showModal()  { show(backdrop); hide(banner); hide(docsOverlay); show(modal); lockScroll(); }
+
+    // 👉 FIX centratura modali: display:flex
+    function showModal()  { backdrop.style.display="block"; banner.style.display="none"; docsOverlay.style.display="none"; modal.style.display="flex"; lockScroll(); }
     function hideModal()  { hide(modal); hide(backdrop); unlockScroll(); }
-    function showDocs()   { show(backdrop); hide(banner); hide(modal); show(docsOverlay); lockScroll(); }
+    function showDocs()   { backdrop.style.display="block"; banner.style.display="none"; modal.style.display="none"; docsOverlay.style.display="flex"; lockScroll(); }
     function hideDocs()   { hide(docsOverlay); show(banner); show(backdrop); lockScroll(); }
 
-    function showFloat(){ floatBtn && (floatBtn.style.display = "inline-flex"); }
+    function showFloat(){ if (!document.body.contains(floatBtn)) document.body.appendChild(floatBtn); floatBtn.style.display = "inline-flex"; }
     function hideFloat(){ floatBtn && (floatBtn.style.display = "none"); }
 
     // ======= CONSENT STATE =======
@@ -237,7 +239,7 @@
       // X -> solo tecnici
       document.getElementById("cc-close").addEventListener("click", function () {
         store(false, false);
-        showFloat();
+        showFloat(); // logo deve comparire sempre
         hideBanner();
       });
       // GESTISCI (sincronizza prima di aprire)
@@ -275,8 +277,8 @@
       docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) hideDocs(); });
       document.addEventListener("keydown", function(e){
         if (e.key === "Escape") {
-          if (docsOverlay.style.display === "block") hideDocs();
-          else if (modal.style.display === "block") hideModal();
+          if (docsOverlay.style.display === "flex") hideDocs();
+          else if (modal.style.display === "flex") hideModal();
           else if (banner.style.display === "block") hideBanner();
         }
       });
@@ -298,7 +300,7 @@
           d.head && d.head.appendChild(s);
         } catch(e) {/* cross-origin: ignora */}
       };
-      showDocs();
+      showDocs(); // ora è display:flex
     }
 
     function mount() {
