@@ -48,11 +48,23 @@
       }
       return null;
     }
-    function pushConsentEvent() {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: "illow_consent" });
-      console.log("[cookie-consent] pushed: illow_consent");
+function pushConsentEvent() {
+  window.dataLayer = window.dataLayer || [];
+
+  const marketing = document.querySelector("#marketing")?.checked || false;
+  const statistics = document.querySelector("#statistics")?.checked || false;
+
+  window.dataLayer.push({
+    event: "illow_consenso_aggiornato",
+    consent: {
+      marketing: marketing,
+      statistics: statistics
     }
+  });
+
+  console.log("[cookie-consent] pushed: illow_consenso_aggiornato", { marketing, statistics });
+}
+
 
     // ======= ICONS (SVG inline, niente emoji) =======
     var icoCookie = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10a4 4 0 0 1-4-4a4 4 0 0 1-4-4Z"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="10.5" cy="16" r="1" fill="#fff"/></svg>';
@@ -340,3 +352,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
