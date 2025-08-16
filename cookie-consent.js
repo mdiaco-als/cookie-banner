@@ -175,7 +175,7 @@ function pushConsentEvent() {
     floatBtn.id = "cc-float";
     floatBtn.type = "button";
     floatBtn.setAttribute("aria-label", "Gestisci preferenze cookie");
-    floatBtn.innerHTML = '<img alt="" src="https://global-files-nginx.builderall.com/da739884-a644-464d-b30b-7e2e5b966fbb/a60de57d4e84cb87174fb85c09720464b33a89b0d87e5298e03206d1eee707bc.svg">';
+    floatBtn.innerHTML = '<img alt="" src="https://global-files-nginx.builderall.com/da739884-a644-464d-b30b-7e2e5b966fbb/5966bda8dae048651151033e9a41f8ee703fdfb7f49f6a9fe9f1c4fe1979fe4c.svg">';
     floatBtn.addEventListener("click", function () {
       window.CC_openConsent();
     });
@@ -352,4 +352,5 @@ function pushConsentEvent() {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
