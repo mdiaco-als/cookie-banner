@@ -48,22 +48,20 @@
       }
       return null;
     }
-function pushConsentEvent() {
+// ---- GTM EVENTS (payload) ----
+function pushConsentEvent(eventName, consent) {
   window.dataLayer = window.dataLayer || [];
-
-  const marketing = document.querySelector("#marketing")?.checked || false;
-  const statistics = document.querySelector("#statistics")?.checked || false;
-
-  window.dataLayer.push({
-    event: "illow_consenso_aggiornato",
-    consent: {
-      marketing: marketing,
-      statistics: statistics
-    }
-  });
-
-  console.log("[cookie-consent] pushed: illow_consenso_aggiornato", { marketing, statistics });
+  var payload = { event: eventName };
+  if (consent && typeof consent === "object") {
+    payload.consent = {
+      marketing: !!consent.marketing,
+      statistics: !!consent.statistics
+    };
+  }
+  window.dataLayer.push(payload);
+  console.log("[cookie-consent] pushed:", payload);
 }
+
 
 
     // ======= ICONS (SVG inline, niente emoji) =======
@@ -205,29 +203,50 @@ function pushConsentEvent() {
 
     // ======= CONSENT STATE =======
     function readConsent() {
-      var v = getCookie(COOKIE_NAME);
-      var res = { marketing: false, statistics: false };
-      if (!v) return res;
-      // supporta sia querystring "marketing=true&statistics=true" sia JSON legacy
-      try {
-        if (v[0] === "{") {
-          var o = JSON.parse(v);
-          res.marketing  = !!(o.all || o.marketing);
-          res.statistics = !!(o.all || o.stats || o.statistics);
-          return res;
-        }
-      } catch(e){}
-      v.split("&").forEach(function (pair) {
-        var kv = pair.split("=");
-        if (kv.length === 2) {
-          var key = kv[0].trim().toLowerCase();
-          var val = kv[1].trim().toLowerCase();
-          if (key === "marketing")  res.marketing  = (val === "true" || val === "1");
-          if (key === "statistics") res.statistics = (val === "true" || val === "1");
-        }
-      });
-      return res;
+  var v = getCookie(COOKIE_NAME);
+  var res = { marketing: false, statistics: false };
+
+  if (v) {
+    try {
+      // JSON legacy
+      if (v[0] === "{") {
+        var o = JSON.parse(v);
+        res.marketing  = !!(o.all || o.marketing);
+        res.statistics = !!(o.all || o.stats || o.statistics);
+        // mirror su localStorage
+        try { localStorage.setItem(COOKIE_NAME, JSON.stringify(res)); } catch(_) {}
+        return res;
+      }
+    } catch(e){}
+
+    // querystring "marketing=true&statistics=true"
+    v.split("&").forEach(function (pair) {
+      var kv = pair.split("=");
+      if (kv.length === 2) {
+        var key = kv[0].trim().toLowerCase();
+        var val = kv[1].trim().toLowerCase();
+        if (key === "marketing")  res.marketing  = (val === "true" || val === "1");
+        if (key === "statistics") res.statistics = (val === "true" || val === "1");
+      }
+    });
+    try { localStorage.setItem(COOKIE_NAME, JSON.stringify(res)); } catch(_) {}
+    return res;
+  }
+
+  // se non c'è cookie, prova localStorage e ricrea il cookie
+  try {
+    var ls = localStorage.getItem(COOKIE_NAME);
+    if (ls) {
+      var parsed = JSON.parse(ls);
+      var m = !!parsed.marketing, s = !!parsed.statistics;
+      setCookie(COOKIE_NAME, "marketing=" + m + "&statistics=" + s, COOKIE_DAYS);
+      return { marketing: m, statistics: s };
     }
+  } catch(_){}
+
+  return res; // default false/false
+}
+
 
     function applyConsentToUI(consent) {
       var m = document.getElementById("cc-marketing");
@@ -239,10 +258,13 @@ function pushConsentEvent() {
     }
 
     function store(mark, stat) {
-      setCookie(COOKIE_NAME, "marketing=" + mark + "&statistics=" + stat, COOKIE_DAYS);
-      pushConsentEvent();
-      applyConsentToUI({ marketing: !!mark, statistics: !!stat }); // sincronizza subito la UI
-    }
+  var consent = { marketing: !!mark, statistics: !!stat };
+  setCookie(COOKIE_NAME, "marketing=" + consent.marketing + "&statistics=" + consent.statistics, COOKIE_DAYS);
+  try { localStorage.setItem(COOKIE_NAME, JSON.stringify(consent)); } catch(_) {}
+  pushConsentEvent("illow_consenso_aggiornato", consent); // GTM con payload
+  applyConsentToUI(consent); // sincronizza subito la UI
+}
+
 
     // ======= MOUNT =======
     function wire() {
@@ -254,10 +276,18 @@ function pushConsentEvent() {
       });
       // X -> solo tecnici
       document.getElementById("cc-close").addEventListener("click", function () {
-        store(false, false);
-        showFloat(); // logo deve comparire sempre
-        hideBanner();
-      });
+  var existing = getCookie(COOKIE_NAME);
+  if (!existing) {
+    // prima volta → solo tecnici
+    store(false, false);
+  } else {
+    // X successiva → NON toccare le preferenze
+    // (solo chiudi; lasciamo invariato quanto già scelto)
+  }
+  showFloat();
+  hideBanner();
+});
+
       // GESTISCI (sincronizza prima di aprire)
       document.getElementById("cc-manage").addEventListener("click", function () {
         applyConsentToUI(readConsent());
@@ -332,12 +362,14 @@ function pushConsentEvent() {
 
       // Se consenso già presente → mostra solo bottone e sincronizza UI
       var existing = getCookie(COOKIE_NAME);
-      if (existing) {
-        applyConsentToUI(readConsent());
-        showFloat();
-        console.log("[cookie-consent] cookie found, skipping banner");
-        return;
-      }
+if (existing) {
+  var c = readConsent();
+  applyConsentToUI(c);
+  showFloat();
+  pushConsentEvent("illow_consent_ready", c); // GTM all'avvio
+  console.log("[cookie-consent] cookie found, skipping banner");
+  return;
+}
       // Altrimenti mostra banner
       showBanner();
     }
@@ -356,6 +388,7 @@ function pushConsentEvent() {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
