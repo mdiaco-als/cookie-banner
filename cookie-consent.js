@@ -81,7 +81,7 @@ function pushConsentEvent(eventName, consent) {
       + "#cc-banner h3{margin:0 0 8px;color:#2e7d32;font-size:18px}"
       + "#cc-banner p{margin:6px 0;font-size:14px;line-height:1.45;display:flex;gap:6px;align-items:flex-start}"
       + "#cc-actions{margin-top:8px;display:flex;flex-wrap:nowrap;gap:10px;align-items:stretch}"
-      + "#cc-actions button{flex:1 1 0;min-width:0;white-space:nowrap;padding:12px 10px;margin:0;border-radius:8px;border:0;font-weig
+      + "#cc-actions button{flex:1 1 0;min-width:0;white-space:nowrap;padding:12px 10px;margin:0;border-radius:8px;border:0;font-weight:700;cursor:pointer;font-size:14px;line-height:1.2}"
       + "#cc-accept{background:#2e7d32;color:#fff}"
       + "#cc-manage{background:#e0e0e0}"
       + "#cc-close{position:absolute;top:6px;right:10px;background:transparent;border:0;font-size:18px;cursor:pointer}"
@@ -390,9 +390,3 @@ if (existing) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
-
-
-
-
-
-
