@@ -201,7 +201,7 @@
       
       // Responsive ottimizzato per mobile
       + "@media (max-width:640px){"
-      + "#cc-banner{padding:1rem;border-radius:16px;width:90vw;max-height:88vh;margin:0 5vw}"
+      + "#cc-banner{padding:1rem;border-radius:16px;width:90vw;max-height:88vh}"
       + "#cc-banner h3{font-size:1.1rem;margin-bottom:1rem;line-height:1.2;padding-right:35px}"
       + "#cc-banner p{margin:.6rem 0;padding:8px;font-size:.85rem;line-height:1.3}"
       + "#cc-banner p svg{width:16px;height:16px}"
@@ -215,7 +215,7 @@
       + "#cc-close{top:12px;right:15px;width:32px;height:32px;font-size:14px}"
       + "}"
       + "@media (max-width:480px){"
-      + "#cc-banner{padding:.9rem;width:92vw;max-height:90vh;margin:0 4vw}"
+      + "#cc-banner{padding:.9rem;width:92vw;max-height:90vh}"
       + "#cc-banner h3{font-size:1rem;margin-bottom:.8rem;padding-right:30px}"
       + "#cc-banner p{margin:.5rem 0;padding:6px;font-size:.8rem}"
       + "#cc-actions{gap:8px}"
@@ -230,7 +230,7 @@
       + "#cc-close{top:10px;right:12px;width:30px;height:30px;font-size:13px}"
       + "}"
       + "@media (max-width:360px){"
-      + "#cc-banner{padding:.8rem;border-radius:12px;width:94vw;margin:0 3vw}"
+      + "#cc-banner{padding:.8rem;border-radius:12px;width:94vw}"
       + "#cc-banner h3{font-size:.95rem;margin-bottom:.6rem;padding-right:28px}"
       + "#cc-banner p{margin:.4rem 0;padding:4px;font-size:.75rem}"
       + "#cc-actions button{font-size:.8rem;padding:10px 12px;min-height:42px}"
