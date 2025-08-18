@@ -77,11 +77,11 @@ function pushConsentEvent(eventName, consent) {
       + "#cc-banner{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100001;"
       + "background:#fff;color:#111;border-top:4px solid #2e7d32;box-shadow:0 10px 30px rgba(0,0,0,.25);"
       + "padding:16px;border-radius:16px;width:min(720px,92vw);max-height:86vh;overflow:auto;"
-      + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;display:none}"
+      + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;display:none;-webkit-text-size-adjust:100%}"
       + "#cc-banner h3{margin:0 0 8px;color:#2e7d32;font-size:18px}"
       + "#cc-banner p{margin:6px 0;font-size:14px;line-height:1.45;display:flex;gap:6px;align-items:flex-start}"
-      + "#cc-actions{margin-top:8px;display:flex;flex-wrap:wrap}"
-      + "#cc-actions button{padding:8px 12px;margin:4px;border-radius:8px;border:0;font-weight:700;cursor:pointer}"
+      + "#cc-actions{margin-top:8px;display:flex;flex-wrap:nowrap;gap:10px;align-items:stretch}"
+      + "#cc-actions button{flex:1 1 0;min-width:0;white-space:nowrap;padding:12px 10px;margin:0;border-radius:8px;border:0;font-weig
       + "#cc-accept{background:#2e7d32;color:#fff}"
       + "#cc-manage{background:#e0e0e0}"
       + "#cc-close{position:absolute;top:6px;right:10px;background:transparent;border:0;font-size:18px;cursor:pointer}"
@@ -102,6 +102,8 @@ function pushConsentEvent(eventName, consent) {
       + "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0}"
       + "#cc-docs-close{background:#e0e0e0;border:0;border-radius:8px;padding:6px 10px;cursor:pointer;flex:0 0 auto}"
       + "@media (max-width:640px){#cc-docs-card{width:100vw;height:100dvh;border-radius:0}}"
+      + "@media (max-width:420px){#cc-actions button{font-size:13px;padding:10px 8px}}"
+      + "@media (max-width:360px){#cc-actions button{font-size:12px;padding:9px 8px}}"
       // ===== Floating re-open button (logo) =====
      + "#cc-float{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));z-index:100004;width:64px;height:64px;border-radius:50%;background:#ffffff;border:1px solid rgba(0,0,0,.08);box-shadow:0 6px 18px rgba(0,0,0,.18);display:none;align-items:center;justify-content:center;cursor:pointer;padding:6px}"
      + "#cc-float img{display:block;width:48px;height:48px}"
@@ -388,6 +390,7 @@ if (existing) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
