@@ -4,152 +4,7 @@
   try {
     console.log("[cookie-consent] init");
 
-    // ======= MOUNT (IDENTICO ALL'ORIGINALE CON SUCCESS MESSAGES) =======
-    function wire() {
-      // ACCETTA TUTTI -> marketing=true & statistics=true
-      document.getElementById("cc-accept").addEventListener("click", function () {
-        store(true, true);
-        showSuccess("🎉 Tutti i cookie accettati!");
-        showFloat();
-        hideBanner();
-      });
-      
-      // X -> solo tecnici (LOGICA ORIGINALE)
-      document.getElementById("cc-close").addEventListener("click", function () {
-        var existing = getCookie(COOKIE_NAME);
-        if (!existing) {
-          // prima volta → solo tecnici
-          store(false, false);
-          showSuccess("❌ Solo cookie tecnici attivi");
-        } else {
-          // X successiva → NON toccare le preferenze
-          // (solo chiudi; lasciamo invariato quanto già scelto)
-          showSuccess("✅ Preferenze mantenute");
-        }
-        showFloat();
-        hideBanner();
-      });
-
-      // GESTISCI (sincronizza prima di aprire)
-      document.getElementById("cc-manage").addEventListener("click", function () {
-        applyConsentToUI(readConsent());
-        showModal();
-      });
-      document.getElementById("cc-cancel").addEventListener("click", function(){ hideModal(); });
-
-      // SALVA PREFERENZE
-      document.getElementById("cc-save").addEventListener("click", function () {
-        var m = document.getElementById("cc-marketing").checked;
-        var s = document.getElementById("cc-statistics").checked;
-        store(m, s);
-        
-        // Success message personalizzato
-        var message = "💾 Preferenze salvate: ";
-        if (m && s) {
-          message += "Marketing + Statistiche";
-        } else if (m) {
-          message += "Solo Marketing";
-        } else if (s) {
-          message += "Solo Statistiche";
-        } else {
-          message += "Solo cookie necessari";
-        }
-        showSuccess(message);
-        
-        showFloat();
-        hideModal();
-      });
-
-      // Link privacy/cookie → modale docs (IDENTICO ALL'ORIGINALE)
-      document.getElementById("cc-privacy").addEventListener("click", function(e){
-        e.preventDefault(); 
-        openDocs(PRIVACY_URL, "Informativa sulla privacy");
-      });
-      document.getElementById("cc-cookie").addEventListener("click", function(e){
-        e.preventDefault(); 
-        openDocs(COOKIE_URL, "Informativa sui cookie");
-      });
-      if (DATA_REQUEST_URL) {
-        var dataLink = document.getElementById("cc-data");
-        if (dataLink) dataLink.addEventListener("click", function(e){
-          e.preventDefault(); 
-          openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
-        });
-      }
-
-      // Docs modal handlers (IDENTICO ALL'ORIGINALE)
-      document.getElementById("cc-docs-close").addEventListener("click", function(){ hideDocs(); });
-      docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) hideDocs(); });
-      document.addEventListener("keydown", function(e){
-        if (e.key === "Escape") {
-          if (docsOverlay.style.display === "flex") hideDocs();
-          else if (modal.style.display === "flex") hideModal();
-          else if (banner.style.display === "block") hideBanner();
-        }
-      });
-    }
-
-    function openDocs(url, title){
-      if (!OPEN_DOCS_IN_MODAL) { 
-        window.open(url, "_blank", "noopener"); 
-        return; 
-      }
-      document.getElementById("cc-docs-title").textContent = title || "Informativa";
-      var ifr = document.getElementById("cc-docs-iframe");
-      ifr.src = url;
-      ifr.onload = function () {
-        try {
-          var d = ifr.contentDocument || ifr.contentWindow.document;
-          var s = d.createElement("style");
-          s.textContent =
-            "html,body{max-width:100%;overflow-x:auto!important}" +
-            "img,video,iframe,table{max-width:100%;height:auto}" +
-            ".container,.wrap,.content{max-width:100%!important}";
-          d.head && d.head.appendChild(s);
-        } catch(e) {/* cross-origin: ignora */}
-      };
-      showDocs(); // ora è display:flex
-    }
-
-    function mount() {
-      // inietta CSS + DOM una sola volta (IDENTICO ALL'ORIGINALE)
-      document.head.appendChild(style);
-      document.body.appendChild(backdrop);
-      document.body.appendChild(banner);
-      document.body.appendChild(modal);
-      document.body.appendChild(docsOverlay);
-      document.body.appendChild(floatBtn);
-
-      wire();
-
-      // Se consenso già presente → mostra solo bottone e sincronizza UI (IDENTICO ALL'ORIGINALE)
-      var existing = getCookie(COOKIE_NAME);
-      if (existing) {
-        var c = readConsent();
-        applyConsentToUI(c);
-        showFloat();
-        pushConsentEvent("illow_consent_ready", c); // GTM all'avvio
-        console.log("[cookie-consent] cookie found, skipping banner");
-        return;
-      }
-      // Altrimenti mostra banner
-      showBanner();
-    }
-
-    // API per riaprire il BANNER principale (IDENTICA ALL'ORIGINALE)
-    window.CC_openConsent = function () { showBanner(); };
-
-    // Ready (IDENTICO ALL'ORIGINALE)
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", mount, { once: true });
-    } else {
-      mount();
-    }
-
-  } catch (err) {
-    console.error("[cookie-consent] fatal error:", err);
-  }
-})();======= CONFIG (overridable via window.CC_CONFIG) =======
+    // ======= CONFIG (overridable via window.CC_CONFIG) =======
     var cfg = (window.CC_CONFIG || {});
     var PRIVACY_URL = cfg.privacy || "#";
     var COOKIE_URL  = cfg.cookie  || "#";
@@ -580,4 +435,149 @@
       applyConsentToUI(consent); // sincronizza subito la UI
     }
 
-    //
+    // ======= MOUNT (IDENTICO ALL'ORIGINALE CON SUCCESS MESSAGES) =======
+    function wire() {
+      // ACCETTA TUTTI -> marketing=true & statistics=true
+      document.getElementById("cc-accept").addEventListener("click", function () {
+        store(true, true);
+        showSuccess("🎉 Tutti i cookie accettati!");
+        showFloat();
+        hideBanner();
+      });
+      
+      // X -> solo tecnici (LOGICA ORIGINALE)
+      document.getElementById("cc-close").addEventListener("click", function () {
+        var existing = getCookie(COOKIE_NAME);
+        if (!existing) {
+          // prima volta → solo tecnici
+          store(false, false);
+          showSuccess("❌ Solo cookie tecnici attivi");
+        } else {
+          // X successiva → NON toccare le preferenze
+          // (solo chiudi; lasciamo invariato quanto già scelto)
+          showSuccess("✅ Preferenze mantenute");
+        }
+        showFloat();
+        hideBanner();
+      });
+
+      // GESTISCI (sincronizza prima di aprire)
+      document.getElementById("cc-manage").addEventListener("click", function () {
+        applyConsentToUI(readConsent());
+        showModal();
+      });
+      document.getElementById("cc-cancel").addEventListener("click", function(){ hideModal(); });
+
+      // SALVA PREFERENZE
+      document.getElementById("cc-save").addEventListener("click", function () {
+        var m = document.getElementById("cc-marketing").checked;
+        var s = document.getElementById("cc-statistics").checked;
+        store(m, s);
+        
+        // Success message personalizzato
+        var message = "💾 Preferenze salvate: ";
+        if (m && s) {
+          message += "Marketing + Statistiche";
+        } else if (m) {
+          message += "Solo Marketing";
+        } else if (s) {
+          message += "Solo Statistiche";
+        } else {
+          message += "Solo cookie necessari";
+        }
+        showSuccess(message);
+        
+        showFloat();
+        hideModal();
+      });
+
+      // Link privacy/cookie → modale docs (IDENTICO ALL'ORIGINALE)
+      document.getElementById("cc-privacy").addEventListener("click", function(e){
+        e.preventDefault(); 
+        openDocs(PRIVACY_URL, "Informativa sulla privacy");
+      });
+      document.getElementById("cc-cookie").addEventListener("click", function(e){
+        e.preventDefault(); 
+        openDocs(COOKIE_URL, "Informativa sui cookie");
+      });
+      if (DATA_REQUEST_URL) {
+        var dataLink = document.getElementById("cc-data");
+        if (dataLink) dataLink.addEventListener("click", function(e){
+          e.preventDefault(); 
+          openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
+        });
+      }
+
+      // Docs modal handlers (IDENTICO ALL'ORIGINALE)
+      document.getElementById("cc-docs-close").addEventListener("click", function(){ hideDocs(); });
+      docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) hideDocs(); });
+      document.addEventListener("keydown", function(e){
+        if (e.key === "Escape") {
+          if (docsOverlay.style.display === "flex") hideDocs();
+          else if (modal.style.display === "flex") hideModal();
+          else if (banner.style.display === "block") hideBanner();
+        }
+      });
+    }
+
+    function openDocs(url, title){
+      if (!OPEN_DOCS_IN_MODAL) { 
+        window.open(url, "_blank", "noopener"); 
+        return; 
+      }
+      document.getElementById("cc-docs-title").textContent = title || "Informativa";
+      var ifr = document.getElementById("cc-docs-iframe");
+      ifr.src = url;
+      ifr.onload = function () {
+        try {
+          var d = ifr.contentDocument || ifr.contentWindow.document;
+          var s = d.createElement("style");
+          s.textContent =
+            "html,body{max-width:100%;overflow-x:auto!important}" +
+            "img,video,iframe,table{max-width:100%;height:auto}" +
+            ".container,.wrap,.content{max-width:100%!important}";
+          d.head && d.head.appendChild(s);
+        } catch(e) {/* cross-origin: ignora */}
+      };
+      showDocs(); // ora è display:flex
+    }
+
+    function mount() {
+      // inietta CSS + DOM una sola volta (IDENTICO ALL'ORIGINALE)
+      document.head.appendChild(style);
+      document.body.appendChild(backdrop);
+      document.body.appendChild(banner);
+      document.body.appendChild(modal);
+      document.body.appendChild(docsOverlay);
+      document.body.appendChild(floatBtn);
+
+      wire();
+
+      // Se consenso già presente → mostra solo bottone e sincronizza UI (IDENTICO ALL'ORIGINALE)
+      var existing = getCookie(COOKIE_NAME);
+      if (existing) {
+        var c = readConsent();
+        applyConsentToUI(c);
+        showFloat();
+        pushConsentEvent("illow_consent_ready", c); // GTM all'avvio
+        console.log("[cookie-consent] cookie found, skipping banner");
+        return;
+      }
+      // Altrimenti mostra banner
+      showBanner();
+    }
+
+    // API per riaprire il BANNER principale (IDENTICA ALL'ORIGINALE)
+    window.CC_openConsent = function () { showBanner(); };
+
+    // Ready (IDENTICO ALL'ORIGINALE)
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mount, { once: true });
+    } else {
+      mount();
+    }
+
+  } catch (err) {
+    console.error("[cookie-consent] fatal error:", err);
+  }
+})();
