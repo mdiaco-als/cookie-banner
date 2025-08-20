@@ -198,9 +198,6 @@
       
       // Animations
       + "@keyframes cc-bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.9)}100%{transform:scale(1);opacity:1}}"
-
-      // Aggiungi questo blocco di codice al termine delle tue regole CSS
-      + ".disable-scroll { touch-action: none; }"
       
       // Responsive ottimizzato per mobile
       + "@media (max-width:640px){"
@@ -337,12 +334,8 @@
       setTimeout(function() { el.style.display = "none"; }, 300);
     }
 
-    function lockScroll() {
-  document.body.classList.add('disable-scroll');
-}
-    function unlockScroll() {
-  document.body.classList.remove('disable-scroll');
-}
+    function lockScroll(){ document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden"; }
+    function unlockScroll(){ document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
 
     function showBanner() { 
       show(backdrop); 
@@ -351,12 +344,11 @@
       hide(docsOverlay); 
       lockScroll(); 
     }
-function hideBanner() {
-    hide(backdrop);
-    hide(banner);
-    unlockScroll();
-    showFloat(); // La cosa fondamentale è chiamare showFloat DOPO unlockScroll
-}
+    function hideBanner() { 
+      hide(backdrop); 
+      hide(banner); 
+      unlockScroll(); 
+    }
 
     // 👉 FIX centratura modali: display:flex CON ANIMAZIONI
     function showModal()  { 
@@ -370,12 +362,11 @@ function hideBanner() {
       }, 10);
       lockScroll(); 
     }
-function hideModal() {
-    hide(modal);
-    hide(backdrop);
-    unlockScroll();
-    showFloat(); // Anche qui, chiamalo solo DOPO aver sbloccato lo scroll
-}
+    function hideModal()  { 
+      hide(modal); 
+      hide(backdrop); 
+      unlockScroll(); 
+    }
     function showDocs()   { 
       backdrop.style.display="block"; 
       banner.classList.remove("cc-show");
@@ -402,27 +393,16 @@ function hideModal() {
       floatBtn && floatBtn.classList.remove("cc-show"); 
     }
 
-function showSuccess(message) {
-  if (message) successNotification.textContent = message;
-  
-  if (!document.body.contains(successNotification)) {
-    document.body.appendChild(successNotification);
-  }
-  
-  successNotification.classList.add('cc-show');
-  
-  // Imposta un timer per avviare l'animazione di uscita dopo 1 secondo
-  setTimeout(function() {
-    successNotification.classList.remove('cc-show');
-    
-    // Imposta un secondo timer per rimuovere l'elemento dopo l'animazione
-    setTimeout(function() {
-      if (document.body.contains(successNotification)) {
-        document.body.removeChild(successNotification);
+    function showSuccess(message) {
+      if (message) successNotification.textContent = message;
+      if (!document.body.contains(successNotification)) {
+        document.body.appendChild(successNotification);
       }
-    }, 400); // Questo valore deve corrispondere a 'transition: all .4s' nel CSS
-  }, 1000); // Rimane visibile per 1 secondo
-}
+      successNotification.classList.add('cc-show');
+      setTimeout(function() {
+        successNotification.classList.remove('cc-show');
+      }, 3000);
+    }
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
     function readConsent() {
@@ -522,26 +502,27 @@ function showSuccess(message) {
 
       // SALVA PREFERENZE
       document.getElementById("cc-save").addEventListener("click", function () {
-        var m = document.getElementById("cc-marketing").checked;
-        var s = document.getElementById("cc-statistics").checked;
-        store(m, s);
-        
-        // Success message personalizzato
-        var message = "💾 Preferenze salvate: ";
-        if (m && s) {
-          message += "Marketing + Statistiche";
-        } else if (m) {
-          message += "Solo Marketing";
-        } else if (s) {
-          message += "Solo Statistiche";
-        } else {
-          message += "Solo cookie necessari";
-        }
-        showSuccess(message);
-        
-        showFloat();
-        hideModal();
-      });
+  var m = document.getElementById("cc-marketing").checked;
+  var s = document.getElementById("cc-statistics").checked;
+  store(m, s);
+  
+  // Success message personalizzato
+  var message = "💾 Preferenze salvate: ";
+  if (m && s) {
+    message += "Marketing + Statistiche";
+  } else if (m) {
+    message += "Solo Marketing";
+  } else if (s) {
+    message += "Solo Statistiche";
+  } else {
+    message += "Solo cookie necessari";
+  }
+  showSuccess(message);
+  
+  showFloat();
+  hideModal();  // Chiude il modal delle preferenze
+  hideBanner(); // ✅ FIX: Chiude anche il banner principale e sblocca lo scroll!
+});
 
       // Link privacy/cookie → modale docs (IDENTICO ALL'ORIGINALE)
       document.getElementById("cc-privacy").addEventListener("click", function(e){
@@ -633,10 +614,3 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
-
-
-
-
-
-
-
