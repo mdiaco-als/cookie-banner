@@ -399,17 +399,20 @@ function showSuccess(message) {
     document.body.appendChild(successNotification);
   }
   successNotification.classList.add('cc-show');
-
+  
   // Nascondi la notifica dopo un certo tempo e rimuovi l'elemento dal DOM.
   setTimeout(function() {
     successNotification.classList.remove('cc-show');
-
+    
     // Aggiungi un secondo setTimeout per rimuovere l'elemento dopo la transizione.
     setTimeout(function() {
       if (document.body.contains(successNotification)) {
         document.body.removeChild(successNotification);
       }
-    }, 400); // 400ms, pari alla durata della transizione nel CSS
+      
+      // Aggiungi questa nuova riga per forzare il ricalcolo dello scroll
+      window.scrollTo(0, 0); 
+    }, 400); 
   }, 1000);
 }
 
@@ -622,5 +625,6 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
