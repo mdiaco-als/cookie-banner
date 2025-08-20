@@ -344,11 +344,12 @@
       hide(docsOverlay); 
       lockScroll(); 
     }
-    function hideBanner() { 
-      hide(backdrop); 
-      hide(banner); 
-      unlockScroll(); 
-    }
+function hideBanner() {
+    hide(backdrop);
+    hide(banner);
+    unlockScroll();
+    showFloat(); // La cosa fondamentale è chiamare showFloat DOPO unlockScroll
+}
 
     // 👉 FIX centratura modali: display:flex CON ANIMAZIONI
     function showModal()  { 
@@ -362,11 +363,12 @@
       }, 10);
       lockScroll(); 
     }
-    function hideModal()  { 
-      hide(modal); 
-      hide(backdrop); 
-      unlockScroll(); 
-    }
+function hideModal() {
+    hide(modal);
+    hide(backdrop);
+    unlockScroll();
+    showFloat(); // Anche qui, chiamalo solo DOPO aver sbloccato lo scroll
+}
     function showDocs()   { 
       backdrop.style.display="block"; 
       banner.classList.remove("cc-show");
@@ -400,20 +402,10 @@ function showSuccess(message) {
   }
   successNotification.classList.add('cc-show');
   
-  // Nascondi la notifica dopo un certo tempo e rimuovi l'elemento dal DOM.
+  // Rimuovi la notifica dopo un certo tempo.
   setTimeout(function() {
     successNotification.classList.remove('cc-show');
-    
-    // Aggiungi un secondo setTimeout per rimuovere l'elemento dopo la transizione.
-    setTimeout(function() {
-      if (document.body.contains(successNotification)) {
-        document.body.removeChild(successNotification);
-      }
-      
-      // Aggiungi questa nuova riga per forzare il ricalcolo dello scroll
-      window.scrollTo(0, 0); 
-    }, 400); 
-  }, 1000);
+  }, 1000); // 1 secondo
 }
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
@@ -625,6 +617,7 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
