@@ -393,16 +393,25 @@
       floatBtn && floatBtn.classList.remove("cc-show"); 
     }
 
-    function showSuccess(message) {
-      if (message) successNotification.textContent = message;
-      if (!document.body.contains(successNotification)) {
-        document.body.appendChild(successNotification);
+function showSuccess(message) {
+  if (message) successNotification.textContent = message;
+  if (!document.body.contains(successNotification)) {
+    document.body.appendChild(successNotification);
+  }
+  successNotification.classList.add('cc-show');
+
+  // Nascondi la notifica dopo un certo tempo e rimuovi l'elemento dal DOM.
+  setTimeout(function() {
+    successNotification.classList.remove('cc-show');
+
+    // Aggiungi un secondo setTimeout per rimuovere l'elemento dopo la transizione.
+    setTimeout(function() {
+      if (document.body.contains(successNotification)) {
+        document.body.removeChild(successNotification);
       }
-      successNotification.classList.add('cc-show');
-      setTimeout(function() {
-        successNotification.classList.remove('cc-show');
-      }, 3000);
-    }
+    }, 400); // 400ms, pari alla durata della transizione nel CSS
+  }, 3000);
+}
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
     function readConsent() {
@@ -613,3 +622,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
