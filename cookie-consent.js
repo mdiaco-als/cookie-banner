@@ -397,15 +397,25 @@ function hideModal() {
 
 function showSuccess(message) {
   if (message) successNotification.textContent = message;
+  
   if (!document.body.contains(successNotification)) {
     document.body.appendChild(successNotification);
   }
+  
+  // Mostra il banner. Il CSS con 'position: fixed' lo fa rimanere al suo posto.
   successNotification.classList.add('cc-show');
   
-  // Rimuovi la notifica dopo un certo tempo.
+  // Nascondi e rimuovi il banner dopo un certo tempo.
   setTimeout(function() {
     successNotification.classList.remove('cc-show');
-  }, 1000); // 1 secondo
+    
+    // Rimuovi fisicamente l'elemento dopo l'animazione di uscita.
+    setTimeout(function() {
+      if (document.body.contains(successNotification)) {
+        document.body.removeChild(successNotification);
+      }
+    }, 400); // Durata dell'animazione
+  }, 1000); // Durata di visualizzazione
 }
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
@@ -617,6 +627,7 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
