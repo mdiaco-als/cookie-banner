@@ -198,6 +198,9 @@
       
       // Animations
       + "@keyframes cc-bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.9)}100%{transform:scale(1);opacity:1}}"
+
+      // Aggiungi questo blocco di codice al termine delle tue regole CSS
+      + ".disable-scroll { touch-action: none; }"
       
       // Responsive ottimizzato per mobile
       + "@media (max-width:640px){"
@@ -334,8 +337,12 @@
       setTimeout(function() { el.style.display = "none"; }, 300);
     }
 
-    function lockScroll(){ document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden"; }
-    function unlockScroll(){ document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
+    function lockScroll() {
+  document.body.classList.add('disable-scroll');
+}
+    function unlockScroll() {
+  document.body.classList.remove('disable-scroll');
+}
 
     function showBanner() { 
       show(backdrop); 
@@ -627,6 +634,7 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
