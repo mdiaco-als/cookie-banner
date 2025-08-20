@@ -409,20 +409,19 @@ function showSuccess(message) {
     document.body.appendChild(successNotification);
   }
   
-  // Mostra il banner. Il CSS con 'position: fixed' lo fa rimanere al suo posto.
   successNotification.classList.add('cc-show');
   
-  // Nascondi e rimuovi il banner dopo un certo tempo.
+  // Imposta un timer per avviare l'animazione di uscita dopo 1 secondo
   setTimeout(function() {
     successNotification.classList.remove('cc-show');
     
-    // Rimuovi fisicamente l'elemento dopo l'animazione di uscita.
+    // Imposta un secondo timer per rimuovere l'elemento dopo l'animazione
     setTimeout(function() {
       if (document.body.contains(successNotification)) {
         document.body.removeChild(successNotification);
       }
-    }, 400); // Durata dell'animazione
-  }, 1000); // Durata di visualizzazione
+    }, 400); // Questo valore deve corrispondere a 'transition: all .4s' nel CSS
+  }, 1000); // Rimane visibile per 1 secondo
 }
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
@@ -634,6 +633,7 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
