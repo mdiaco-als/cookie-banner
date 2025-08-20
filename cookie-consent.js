@@ -517,11 +517,15 @@
   } else {
     message += "Solo cookie necessari";
   }
-  showSuccess(message);
   
   showFloat();
-  hideModal();  // Chiude il modal delle preferenze
-  hideBanner(); // ✅ FIX: Chiude anche il banner principale e sblocca lo scroll!
+  hideModal();
+  hideBanner();
+  
+  // ✅ FIX: Ritarda la notifica di 400ms per evitare conflitti con le animazioni di chiusura
+  setTimeout(function() {
+    showSuccess(message);
+  }, 400);
 });
 
       // Link privacy/cookie → modale docs (IDENTICO ALL'ORIGINALE)
@@ -614,3 +618,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
