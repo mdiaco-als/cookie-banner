@@ -410,7 +410,7 @@ function showSuccess(message) {
         document.body.removeChild(successNotification);
       }
     }, 400); // 400ms, pari alla durata della transizione nel CSS
-  }, 3000);
+  }, 1000);
 }
 
     // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
@@ -622,4 +622,5 @@ function showSuccess(message) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
