@@ -501,7 +501,13 @@
         applyConsentToUI(readConsent());
         showModal();
       });
-      document.getElementById("cc-cancel").addEventListener("click", function(){ hideModal(); });
+      document.getElementById("cc-cancel").addEventListener("click", function(){ hidedocument.getElementById("cc-cancel").addEventListener("click", function(){ 
+  hideModal();
+  // ✅ FIX: Ripristina il banner principale quando si annulla
+  setTimeout(function() {
+    showBanner();
+  }, 100);
+});Modal(); });
 
       // SALVA PREFERENZE
       document.getElementById("cc-save").addEventListener("click", function () {
@@ -621,5 +627,6 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
