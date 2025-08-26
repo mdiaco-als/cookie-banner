@@ -173,7 +173,7 @@
 + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;"
 + "padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.1);font-weight:700;flex:0 0 auto;"
 + "background:rgba(46,125,50,.05)}"
-+ "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0;"
++ "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0}"
 + "#cc-docs-close{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);border-radius:8px;"
 + "padding:8px 16px;cursor:pointer;flex:0 0 auto;transition:all .2s ease}"
 + "#cc-docs-close:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
@@ -692,6 +692,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
