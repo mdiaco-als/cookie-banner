@@ -590,11 +590,17 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
       d.documentElement.scrollTop = 0;
       d.body.scrollTop = 0;
       
-      // Intercetta TUTTI i link della pagina
+      // Intercetta SOLO i link che NON hanno onclick con navigateToPage
       var links = d.querySelectorAll('a[href]');
       for (var i = 0; i < links.length; i++) {
         var link = links[i];
         var href = link.getAttribute('href');
+        var onclick = link.getAttribute('onclick');
+        
+        // Skip link che già usano navigateToPage
+        if (onclick && onclick.indexOf('navigateToPage') > -1) {
+          continue;
+        }
         
         // Solo link relativi o che contengono privacy/cookie
         if (href && (
@@ -702,6 +708,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
