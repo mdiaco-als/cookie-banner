@@ -174,7 +174,6 @@
 + "padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.1);font-weight:700;flex:0 0 auto;"
 + "background:rgba(46,125,50,.05)}"
 + "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0;"
-+ "overflow:auto;overscroll-behavior:contain}"
 + "#cc-docs-close{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);border-radius:8px;"
 + "padding:8px 16px;cursor:pointer;flex:0 0 auto;transition:all .2s ease}"
 + "#cc-docs-close:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
@@ -568,96 +567,86 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     }
 
     function openDocs(url, title){
-      if (!OPEN_DOCS_IN_MODAL) { 
-        window.open(url, "_blank", "noopener"); 
-        return; 
-      }
-      document.getElementById("cc-docs-title").textContent = title || "Informativa";
-      var ifr = document.getElementById("cc-docs-iframe");
-      ifr.src = url;
+  if (!OPEN_DOCS_IN_MODAL) { 
+    window.open(url, "_blank", "noopener"); 
+    return; 
+  }
+  
+  document.getElementById("cc-docs-title").textContent = title || "Informativa";
+  var ifr = document.getElementById("cc-docs-iframe");
+  ifr.src = url;
+  
+  ifr.onload = function () {
+    try {
+      var d = ifr.contentDocument || ifr.contentWindow.document;
+      var s = d.createElement("style");
+      s.textContent =
+        "html,body{max-width:100%;overflow-x:auto!important;scroll-behavior:smooth}" +
+        "img,video,iframe,table{max-width:100%;height:auto}" +
+        ".container,.wrap,.content{max-width:100%!important}";
+      d.head && d.head.appendChild(s);
       
-      ifr.onload = function () {
-        try {
-          var d = ifr.contentDocument || ifr.contentWindow.document;
-          var s = d.createElement("style");
-          s.textContent =
-            "html,body{max-width:100%;overflow-x:auto!important;scroll-behavior:smooth}" +
-            "img,video,iframe,table{max-width:100%;height:auto}" +
-            ".container,.wrap,.content{max-width:100%!important}";
-          d.head && d.head.appendChild(s);
+      // Reset scroll position
+      d.documentElement.scrollTop = 0;
+      d.body.scrollTop = 0;
+      
+      // Intercetta TUTTI i link della pagina
+      var links = d.querySelectorAll('a[href]');
+      for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        var href = link.getAttribute('href');
+        
+        // Solo link relativi o che contengono privacy/cookie
+        if (href && (
+          !href.startsWith('http') || // link relativi
+          href.indexOf('privacy') > -1 || 
+          href.indexOf('cookie') > -1
+        )) {
           
-          // ✅ FIX: Gestione migliorata dei link interni
-          var links = d.querySelectorAll('a[href]');
-          for (var i = 0; i < links.length; i++) {
-            var link = links[i];
-            var href = link.getAttribute('href');
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
             
-            // Controlla se è un link interno che vogliamo intercettare
-            if (href && (
-              href.indexOf('cookie') > -1 || 
-              href.indexOf('privacy') > -1 ||
-              href === COOKIE_URL ||
-              href === PRIVACY_URL ||
-              href.indexOf('#') === 0 // Link di ancoraggio interni
-            )) {
-              
-              // ✅ FIX: Event listener con prevenzione completa della navigazione normale
-              (function(currentLink, currentHref) {
-                currentLink.addEventListener('click', function(e) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  e.stopImmediatePropagation();
-                  
-                  // Se è un link di ancoraggio interno, scrolla solo dentro l'iframe
-                  if (currentHref.indexOf('#') === 0) {
-                    var targetElement = d.querySelector(currentHref);
-                    if (targetElement) {
-                      targetElement.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start',
-                        inline: 'nearest'
-                      });
-                    }
-                    return false;
-                  }
-                  
-                  var newTitle = "Informativa";
-                  
-                  // Determina il titolo in base all'URL
-                  if (currentHref.indexOf('cookie') > -1 || currentHref === COOKIE_URL) {
-                    newTitle = "Informativa sui cookie";
-                  } else if (currentHref.indexOf('privacy') > -1 || currentHref === PRIVACY_URL) {
-                    newTitle = "Informativa sulla privacy";
-                  }
-                  
-                  // ✅ FIX: Aggiorna il modal con delay per evitare conflitti
-                  setTimeout(function() {
-                    document.getElementById("cc-docs-title").textContent = newTitle;
-                    ifr.src = currentHref;
-                  }, 50);
-                  
-                  return false;
-                }, { passive: false });
-              })(link, href);
+            var targetHref = this.getAttribute('href');
+            
+            // Se è un anchor link interno (#sezione)
+            if (targetHref.startsWith('#')) {
+              var targetElement = d.querySelector(targetHref);
+              if (targetElement) {
+                targetElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start' 
+                });
+              }
+              return;
             }
-          }
-          
-          // ✅ FIX: Reset scroll position quando si cambia pagina
-          setTimeout(function() {
-            try {
-              if (d.documentElement) d.documentElement.scrollTop = 0;
-              if (d.body) d.body.scrollTop = 0;
-            } catch(e) {}
-          }, 100);
-          
-        } catch(e) {
-          // Se cross-origin, non possiamo modificare i link
-          console.log("[cookie-consent] Cannot modify iframe links (cross-origin)");
+            
+            // Determina il nuovo titolo
+            var newTitle = "Informativa";
+            if (targetHref.indexOf('cookie') > -1) {
+              newTitle = "Informativa sui cookie";
+            } else if (targetHref.indexOf('privacy') > -1) {
+              newTitle = "Informativa sulla privacy";
+            }
+            
+            // Aggiorna il modal
+            document.getElementById("cc-docs-title").textContent = newTitle;
+            
+            // Carica la nuova pagina con un piccolo delay
+            setTimeout(function() {
+              ifr.src = targetHref;
+            }, 10);
+          });
         }
-      };
+      }
       
-      showDocs();
+    } catch(e) {
+      console.log("[cookie-consent] Cannot modify iframe content:", e);
     }
+  };
+  
+  showDocs();
+}
     
     function resolveUrl(baseUrl, relativeUrl) {
   if (relativeUrl.indexOf('http') === 0) return relativeUrl;
@@ -703,6 +692,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
