@@ -278,7 +278,7 @@
       +     '<span id="cc-docs-title">Informativa</span>'
       +     '<button id="cc-docs-close">Chiudi</button>'
       +   '</div>'
-      +   '<iframe id="cc-docs-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" referrerpolicy="no-referrer"></iframe>'
+      +   '<iframe id="cc-docs-iframe" referrerpolicy="no-referrer"></iframe>'
       + '</div>'
     );
 
@@ -708,6 +708,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
