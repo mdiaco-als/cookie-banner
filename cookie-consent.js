@@ -680,6 +680,16 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
 
     // API per riaprire il BANNER principale (IDENTICA ALL'ORIGINALE)
     window.CC_openConsent = function () { showBanner(); };
+    window.CC_navigateModal = function(url, title) {
+  var modal = document.getElementById("cc-docs");
+  if (modal && modal.style.display === "flex") {
+    document.getElementById("cc-docs-title").textContent = title || "Informativa";
+    var ifr = document.getElementById("cc-docs-iframe");
+    ifr.src = url;
+    return true;
+  }
+  return false;
+};
 
     // Ready (IDENTICO ALL'ORIGINALE)
     if (document.readyState === "loading") {
@@ -692,6 +702,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
