@@ -566,27 +566,66 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     }
 
     function openDocs(url, title){
-      if (!OPEN_DOCS_IN_MODAL) { 
-        window.open(url, "_blank", "noopener"); 
-        return; 
+  if (!OPEN_DOCS_IN_MODAL) { 
+    window.open(url, "_blank", "noopener"); 
+    return; 
+  }
+  document.getElementById("cc-docs-title").textContent = title || "Informativa";
+  var ifr = document.getElementById("cc-docs-iframe");
+  ifr.src = url;
+  ifr.onload = function () {
+    try {
+      var d = ifr.contentDocument || ifr.contentWindow.document;
+      var s = d.createElement("style");
+      s.textContent =
+        "html,body{max-width:100%;overflow-x:auto!important}" +
+        "img,video,iframe,table{max-width:100%;height:auto}" +
+        ".container,.wrap,.content{max-width:100%!important}";
+      d.head && d.head.appendChild(s);
+      
+      // ✅ NUOVO: Intercetta i link interni per evitare l'effetto matrioska
+      var links = d.querySelectorAll('a[href]');
+      for (var i = 0; i < links.length; i++) {
+        var link = links[i];
+        var href = link.getAttribute('href');
+        
+        // Se il link punta alla cookie policy o privacy policy
+        if (href && (
+          href.indexOf('cookie') > -1 || 
+          href.indexOf('privacy') > -1 ||
+          href === COOKIE_URL ||
+          href === PRIVACY_URL
+        )) {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var targetUrl = this.getAttribute('href');
+            var newTitle = "Informativa";
+            
+            // Determina il titolo in base all'URL
+            if (targetUrl.indexOf('cookie') > -1 || targetUrl === COOKIE_URL) {
+              newTitle = "Informativa sui cookie";
+            } else if (targetUrl.indexOf('privacy') > -1 || targetUrl === PRIVACY_URL) {
+              newTitle = "Informativa sulla privacy";
+            }
+            
+            // Aggiorna il modal esistente invece di aprirne uno nuovo
+            document.getElementById("cc-docs-title").textContent = newTitle;
+            ifr.src = targetUrl;
+          });
+        }
       }
-      document.getElementById("cc-docs-title").textContent = title || "Informativa";
-      var ifr = document.getElementById("cc-docs-iframe");
-      ifr.src = url;
-      ifr.onload = function () {
-        try {
-          var d = ifr.contentDocument || ifr.contentWindow.document;
-          var s = d.createElement("style");
-          s.textContent =
-            "html,body{max-width:100%;overflow-x:auto!important}" +
-            "img,video,iframe,table{max-width:100%;height:auto}" +
-            ".container,.wrap,.content{max-width:100%!important}";
-          d.head && d.head.appendChild(s);
-        } catch(e) {/* cross-origin: ignora */}
-      };
-      showDocs(); // ora è display:flex
+    } catch(e) {
+      // Se cross-origin, non possiamo modificare i link
+      console.log("[cookie-consent] Cannot modify iframe links (cross-origin)");
     }
-
+  };
+  showDocs();
+}
+    function resolveUrl(baseUrl, relativeUrl) {
+  if (relativeUrl.indexOf('http') === 0) return relativeUrl;
+  var base = new URL(baseUrl);
+  return new URL(relativeUrl, base.origin).href;
+}
     function mount() {
       // inietta CSS + DOM una sola volta (IDENTICO ALL'ORIGINALE)
       document.head.appendChild(style);
@@ -626,6 +665,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
