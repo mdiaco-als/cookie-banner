@@ -63,7 +63,7 @@
       console.log("[cookie-consent] pushed:", payload);
     }
 
-    // ======= CSS SEMPLIFICATO =======
+    // ======= CSS SEMPLIFICATO CON BOTTONI MOBILE CORRETTI =======
     var css = `
       /* Banner principale - SEMPLICE */
       #cc-banner {
@@ -201,7 +201,7 @@
         color: #333;
       }
       
-      /* MOBILE - layout verticale semplice */
+      /* MOBILE - layout verticale con bottoni 50% */
       @media (max-width: 768px) {
         #cc-container {
           flex-direction: column;
@@ -229,12 +229,18 @@
           gap: 8px;
         }
         
+        /* CORREZIONE: bottoni occupano 50% ciascuno */
         #cc-primary button {
           flex: 1;
+          min-width: 0;
+          padding: 12px 8px;
+          font-size: 14px;
         }
         
         #cc-manage {
           width: 100%;
+          padding: 10px 16px;
+          font-size: 14px;
         }
       }
       
@@ -246,11 +252,19 @@
         #cc-title {
           font-size: 14px;
         }
-        #cc-desc, #cc-buttons button {
+        #cc-desc {
           font-size: 13px;
         }
         #cc-instr, #cc-links a {
           font-size: 12px;
+        }
+        #cc-primary button {
+          font-size: 13px;
+          padding: 11px 8px;
+        }
+        #cc-manage {
+          font-size: 13px;
+          padding: 9px 14px;
         }
       }
       
