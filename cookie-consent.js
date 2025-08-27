@@ -84,6 +84,7 @@
       
       // Container principale - layout flexibile
       + "#cc-content{display:flex;align-items:flex-start;gap:16px;max-width:1200px;margin:0 auto}"
+      + "#cc-header{display:flex;align-items:flex-start;gap:12px;flex:1}"
       
       // Icona cookie
       + "#cc-icon{flex:0 0 auto;display:flex;align-items:center;color:#2e7d32;margin-top:2px}"
@@ -286,15 +287,15 @@
       + '<div id="cc-content">'
       +   '<div id="cc-header">'
       +     '<div id="cc-icon">' + icoCookie + '</div>'
-      +     '<h3 id="cc-title">Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
-      +   '</div>'
-      +   '<div id="cc-text">'
-      +     '<p id="cc-description">Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per altre finalità come specificato nella <a href="' + COOKIE_URL + '" id="cc-cookie-inline">cookie policy</a>.</p>'
-      +     '<p id="cc-instruction">Usa il pulsante "Accetta" per acconsentire. Usa il pulsante "Rifiuta" o chiudi questa informativa per continuare senza accettare.</p>'
-      +     '<div id="cc-links">'
-      +       '<a id="cc-privacy" href="' + PRIVACY_URL + '">Info privacy</a>'
-      +       '<a id="cc-cookie" href="' + COOKIE_URL + '">Info cookie</a>'
-      +       (DATA_REQUEST_URL ? '<a id="cc-data" href="' + DATA_REQUEST_URL + '">Richiesta dati</a>' : '')
+      +     '<div id="cc-text">'
+      +       '<h3 id="cc-title">Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
+      +       '<p id="cc-description">Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per altre finalità come specificato nella <a href="' + COOKIE_URL + '" id="cc-cookie-inline">cookie policy</a>.</p>'
+      +       '<p id="cc-instruction">Usa il pulsante "Accetta" per acconsentire. Usa il pulsante "Rifiuta" o chiudi questa informativa per continuare senza accettare.</p>'
+      +       '<div id="cc-links">'
+      +         '<a id="cc-privacy" href="' + PRIVACY_URL + '">Info privacy</a>'
+      +         '<a id="cc-cookie" href="' + COOKIE_URL + '">Info cookie</a>'
+      +         (DATA_REQUEST_URL ? '<a id="cc-data" href="' + DATA_REQUEST_URL + '">Richiesta dati</a>' : '')
+      +       '</div>'
       +     '</div>'
       +   '</div>'
       +   '<div id="cc-actions">'
