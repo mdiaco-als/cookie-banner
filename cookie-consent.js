@@ -697,6 +697,24 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
   return false;
 };
 
+    // Aggiungi questo dopo window.CC_navigateModal
+window.addEventListener('message', function(event) {
+  // Verifica l'origine per sicurezza
+  if (event.origin !== 'https://www.alimentiamolasalute.org' && 
+      event.origin !== 'https://alimentiamolasalute.org') {
+    return;
+  }
+  
+  if (event.data.type === 'NAVIGATE_MODAL' && event.data.url && event.data.title) {
+    var modal = document.getElementById("cc-docs");
+    if (modal && modal.style.display === "flex") {
+      document.getElementById("cc-docs-title").textContent = event.data.title;
+      var ifr = document.getElementById("cc-docs-iframe");
+      ifr.src = event.data.url;
+    }
+  }
+});
+
     // Ready (IDENTICO ALL'ORIGINALE)
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", mount, { once: true });
@@ -708,6 +726,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
 
