@@ -284,9 +284,11 @@
     banner.innerHTML = (
       '<button id="cc-close" aria-label="Chiudi banner cookie">✖</button>'
       + '<div id="cc-content">'
-      +   '<div id="cc-icon">' + icoCookie + '</div>'
-      +   '<div id="cc-text">'
+      +   '<div id="cc-header">'
+      +     '<div id="cc-icon">' + icoCookie + '</div>'
       +     '<h3 id="cc-title">Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
+      +   '</div>'
+      +   '<div id="cc-text">'
       +     '<p id="cc-description">Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per altre finalità come specificato nella <a href="' + COOKIE_URL + '" id="cc-cookie-inline">cookie policy</a>.</p>'
       +     '<p id="cc-instruction">Usa il pulsante "Accetta" per acconsentire. Usa il pulsante "Rifiuta" o chiudi questa informativa per continuare senza accettare.</p>'
       +     '<div id="cc-links">'
