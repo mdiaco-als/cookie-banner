@@ -1,4 +1,4 @@
-// cookie-consent.js — banner centrato, SVG icons, modale docs responsive, GTM event - VERSIONE MODERNIZZATA
+// cookie-consent.js — banner GDPR compliant, non invasivo, posizionato in alto
 (function () {
   "use strict";
   try {
@@ -63,78 +63,79 @@
       console.log("[cookie-consent] pushed:", payload);
     }
 
-    // ======= ICONS (SVG inline, niente emoji) =======
-    var icoCookie = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10a4 4 0 0 1-4-4a4 4 0 0 1-4-4Z"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="10.5" cy="16" r="1" fill="#fff"/></svg>';
-    var icoWrench = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M22 7.46a5 5 0 0 1-6.53 6.53l-7.2 7.2a2 2 0 0 1-2.83 0l-1.63-1.63a2 2 0 0 1 0-2.83l7.2-7.2A5 5 0 0 1 22 7.46Z"/></svg>';
-    var icoPage   = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path fill="currentColor" d="M14 2v6h6"/></svg>';
-    var icoCross  = '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="2" fill="none" d="M6 6l12 12M18 6L6 18"/></svg>';
+    // ======= ICONS (SVG inline) =======
+    var icoCookie = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10a4 4 0 0 1-4-4a4 4 0 0 1-4-4Z"/><circle cx="8" cy="10" r="1.5" fill="#fff"/><circle cx="14" cy="14" r="1.5" fill="#fff"/><circle cx="10.5" cy="16" r="1" fill="#fff"/></svg>';
 
-    // ======= CSS MODERNIZZATO =======
+    // ======= CSS MODERNIZZATO NON INVASIVO =======
     var css = ""
-      // Backdrop modernizzato con blur maggiore e animazioni
-      + "#cc-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;opacity:0;transition:all .4s cubic-bezier(.16,1,.3,1)}"
-      + "#cc-backdrop.cc-show{opacity:1}"
-      
-      // Banner modernizzato con glassmorphism
-      + "#cc-banner{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);z-index:100001;"
-      + "background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);"
-      + "border:1px solid rgba(255,255,255,.8);box-shadow:0 20px 60px rgba(0,0,0,.15),0 0 0 1px rgba(255,255,255,.1) inset;"
-      + "padding:2rem;border-radius:24px;width:min(720px,92vw);max-height:86vh;overflow:auto;color:#1a1a1a;"
+      // Banner posizionato in alto, NON blocca scroll
+      + "#cc-banner{position:fixed;top:0;left:0;right:0;z-index:100001;"
+      + "background:rgba(255,255,255,.98);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);"
+      + "border-bottom:1px solid rgba(46,125,50,.15);box-shadow:0 4px 20px rgba(0,0,0,.1);"
+      + "padding:16px 20px;color:#1a1a1a;"
       + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;"
-      + "display:none;opacity:0;transition:all .5s cubic-bezier(.16,1,.3,1);-webkit-text-size-adjust:100%}"
-      + "#cc-banner.cc-show{opacity:1;transform:translate(-50%,-50%) scale(1)}"
+      + "display:none;opacity:0;transform:translateY(-100%);transition:all .4s cubic-bezier(.16,1,.3,1);"
+      + "-webkit-text-size-adjust:100%;max-width:100%;box-sizing:border-box}"
+      + "#cc-banner.cc-show{opacity:1;transform:translateY(0)}"
       
-      // Gradient top border modernizzato
-      + "#cc-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;"
-      + "background:linear-gradient(90deg,#2e7d32,#4caf50,#66bb6a);border-radius:24px 24px 0 0}"
+      // Gradient top border
+      + "#cc-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;"
+      + "background:linear-gradient(90deg,#2e7d32,#4caf50,#66bb6a)}"
       
-      // Titolo modernizzato
-      + "#cc-banner h3{margin:0 0 1.5rem;color:#2e7d32;font-size:1.4rem;font-weight:700;line-height:1.3;padding-right:40px}"
+      // Container principale - layout flexibile
+      + "#cc-content{display:flex;align-items:center;gap:16px;max-width:1200px;margin:0 auto}"
       
-      // Paragrafi come feature cards modernizzate
-      + "#cc-banner p{margin:1rem 0;font-size:.95rem;line-height:1.5;display:flex;gap:12px;align-items:flex-start;"
-      + "padding:12px;border-radius:12px;background:rgba(46,125,50,.04);border:1px solid rgba(46,125,50,.1);"
-      + "transition:all .2s ease}"
-      + "#cc-banner p:hover{background:rgba(46,125,50,.08);transform:translateX(4px)}"
-      + "#cc-banner p svg{color:#2e7d32;flex-shrink:0;margin-top:2px;width:20px;height:20px}"
-      + "#cc-banner p span{color:#333}"
+      // Icona cookie
+      + "#cc-icon{flex:0 0 auto;display:flex;align-items:center;color:#2e7d32}"
       
-      // Actions modernizzate
-      + "#cc-actions{margin-top:1.5rem;display:flex;flex-wrap:nowrap;gap:12px;align-items:stretch}"
-      + "#cc-actions button{flex:1 1 0;min-width:0;white-space:normal;word-break:break-word;line-height:1.2;"
-      + "padding:14px 16px;margin:0;border-radius:12px;border:none;font-weight:600;cursor:pointer;"
-      + "font-size:.95rem;text-align:center;transition:all .3s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden}"
+      // Testo principale
+      + "#cc-text{flex:1 1 auto;min-width:0}"
+      + "#cc-title{margin:0 0 6px;color:#2e7d32;font-size:1rem;font-weight:700;line-height:1.3}"
+      + "#cc-description{margin:0 0 8px;font-size:.9rem;line-height:1.4;color:#333}"
+      + "#cc-instruction{margin:0;font-size:.85rem;line-height:1.3;color:#666}"
+      
+      // Links footer
+      + "#cc-links{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem}"
+      + "#cc-links a{color:#2e7d32;text-decoration:none;padding:2px 6px;border-radius:4px;"
+      + "transition:all .2s ease;border:1px solid transparent}"
+      + "#cc-links a:hover{background:rgba(46,125,50,.1);border-color:rgba(46,125,50,.2)}"
+      
+      // Actions container
+      + "#cc-actions{flex:0 0 auto;display:flex;gap:8px;align-items:center}"
+      + "#cc-actions button{white-space:nowrap;padding:10px 20px;margin:0;border-radius:8px;"
+      + "border:none;font-weight:600;cursor:pointer;font-size:.9rem;text-align:center;"
+      + "transition:all .3s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;min-height:40px}"
       
       // Shimmer effect sui bottoni
       + "#cc-actions button::before{content:'';position:absolute;inset:0;"
-      + "background:linear-gradient(45deg,transparent,rgba(255,255,255,.1),transparent);"
+      + "background:linear-gradient(45deg,transparent,rgba(255,255,255,.2),transparent);"
       + "transform:translateX(-100%);transition:transform .6s}"
       + "#cc-actions button:hover::before{transform:translateX(100%)}"
       
-      // Bottone Accept modernizzato
+      // Bottone Rifiuta
+      + "#cc-reject{background:linear-gradient(135deg,#d32f2f,#e57373);color:#fff;"
+      + "box-shadow:0 2px 8px rgba(211,47,47,.3)}"
+      + "#cc-reject:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(211,47,47,.4)}"
+      
+      // Bottone Accept
       + "#cc-accept{background:linear-gradient(135deg,#2e7d32,#388e3c);color:#fff;"
-      + "box-shadow:0 4px 15px rgba(46,125,50,.3)}"
-      + "#cc-accept:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(46,125,50,.4)}"
+      + "box-shadow:0 2px 8px rgba(46,125,50,.3)}"
+      + "#cc-accept:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,125,50,.4)}"
       
-      // Bottone Manage modernizzato
-      + "#cc-manage{background:rgba(0,0,0,.04);color:#333;border:1px solid rgba(0,0,0,.1)}"
-      + "#cc-manage:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
+      // Bottone Manage
+      + "#cc-manage{background:rgba(0,0,0,.06);color:#333;border:1px solid rgba(0,0,0,.15);"
+      + "font-size:.85rem;padding:8px 16px;margin-top:4px}"
+      + "#cc-manage:hover{background:rgba(0,0,0,.1);transform:translateY(-1px)}"
       
-      // Close button modernizzato
-      + "#cc-close{position:absolute;top:16px;right:20px;background:rgba(0,0,0,.05);border:none;"
-      + "width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;"
-      + "justify-content:center;transition:all .2s ease;color:#666;font-size:16px}"
-      + "#cc-close:hover{background:rgba(0,0,0,.1);transform:scale(1.1)}"
+      // Backdrop per modali (NON per il banner principale)
+      + "#cc-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.4);"
+      + "backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;opacity:0;"
+      + "transition:all .4s cubic-bezier(.16,1,.3,1)}"
+      + "#cc-backdrop.cc-show{opacity:1}"
       
-      // Links modernizzati
-      + "#cc-links{font-size:.9rem;margin:1.5rem 0 1rem;display:flex;flex-wrap:wrap;gap:16px}"
-      + "#cc-links a{color:#2e7d32;text-decoration:none;padding:4px 8px;border-radius:6px;"
-      + "transition:all .2s ease;border:1px solid transparent}"
-      + "#cc-links a:hover{background:rgba(46,125,50,.1);border-color:rgba(46,125,50,.2);transform:translateY(-1px)}"
-      
-      // Modal modernizzato
-      + "#cc-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100002;"
-      + "background:rgba(0,0,0,.6);opacity:0;transition:opacity .3s ease}"
+      // Modal preferenze (mantenuto centrato)
+      + "#cc-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;"
+      + "z-index:100002;background:rgba(0,0,0,.6);opacity:0;transition:opacity .3s ease}"
       + "#cc-modal.cc-show{opacity:1}"
       + "#cc-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);color:#111;max-width:520px;"
       + "width:92%;border-radius:20px;padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.2);"
@@ -143,7 +144,7 @@
       + "#cc-modal.cc-show #cc-card{transform:scale(1)}"
       + "#cc-card h3{margin:0 0 1.5rem;color:#2e7d32;font-size:1.3rem;font-weight:700}"
       
-      // Preference rows modernizzate
+      // Preference rows
       + ".cc-row{display:flex;align-items:center;gap:12px;margin:12px 0;padding:16px;"
       + "border-radius:12px;background:rgba(0,0,0,.02);border:1px solid rgba(0,0,0,.05);"
       + "transition:all .2s ease}"
@@ -151,7 +152,7 @@
       + ".cc-row input{transform:scale(1.3);margin:0;accent-color:#2e7d32;cursor:pointer}"
       + ".cc-row label{flex:1;font-weight:600;color:#333;cursor:pointer}"
       
-      // Save/Cancel buttons modernizzati
+      // Save/Cancel buttons
       + "#cc-save{background:linear-gradient(135deg,#2e7d32,#388e3c);color:#fff;padding:12px 24px;"
       + "border:none;border-radius:12px;font-weight:600;cursor:pointer;margin-right:12px;"
       + "transition:all .3s ease}"
@@ -160,25 +161,25 @@
       + "border:1px solid rgba(0,0,0,.1);border-radius:12px;cursor:pointer;transition:all .2s ease}"
       + "#cc-cancel:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
       
-      // Docs modal modernizzato
-+ "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;"
-+ "align-items:center;justify-content:center;overflow:hidden;opacity:0;transition:opacity .3s ease;"
-+ "overscroll-behavior:contain}"
-+ "#cc-docs.cc-show{opacity:1}"
-+ "#cc-docs-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);color:#111;box-sizing:border-box;"
-+ "width:min(96vw,1200px);height:min(92vh,1000px);border-radius:16px;"
-+ "box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;"
-+ "transform:scale(.95);transition:transform .3s cubic-bezier(.16,1,.3,1)}"
-+ "#cc-docs.cc-show #cc-docs-card{transform:scale(1)}"
-+ "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;"
-+ "padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.1);font-weight:700;flex:0 0 auto;"
-+ "background:rgba(46,125,50,.05)}"
-+ "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0}"
-+ "#cc-docs-close{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);border-radius:8px;"
-+ "padding:8px 16px;cursor:pointer;flex:0 0 auto;transition:all .2s ease}"
-+ "#cc-docs-close:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
+      // Docs modal
+      + "#cc-docs{position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.6);display:none;"
+      + "align-items:center;justify-content:center;overflow:hidden;opacity:0;transition:opacity .3s ease;"
+      + "overscroll-behavior:contain}"
+      + "#cc-docs.cc-show{opacity:1}"
+      + "#cc-docs-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);color:#111;box-sizing:border-box;"
+      + "width:min(96vw,1200px);height:min(92vh,1000px);border-radius:16px;"
+      + "box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;"
+      + "transform:scale(.95);transition:transform .3s cubic-bezier(.16,1,.3,1)}"
+      + "#cc-docs.cc-show #cc-docs-card{transform:scale(1)}"
+      + "#cc-docs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;"
+      + "padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.1);font-weight:700;flex:0 0 auto;"
+      + "background:rgba(46,125,50,.05)}"
+      + "#cc-docs-iframe{display:block;flex:1 1 auto;width:100%;height:100%;border:0}"
+      + "#cc-docs-close{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.1);border-radius:8px;"
+      + "padding:8px 16px;cursor:pointer;flex:0 0 auto;transition:all .2s ease}"
+      + "#cc-docs-close:hover{background:rgba(0,0,0,.08);transform:translateY(-1px)}"
       
-      // Floating button modernizzato
+      // Floating button
       + "#cc-float{position:fixed;left:calc(14px + env(safe-area-inset-left));"
       + "bottom:calc(14px + env(safe-area-inset-bottom));z-index:100004;width:64px;height:64px;"
       + "border-radius:50%;background:linear-gradient(135deg,#2e7d32,#4caf50);border:none;"
@@ -191,67 +192,54 @@
       + "#cc-float:focus-visible{outline:2px solid #8dd;outline-offset:3px}"
       
       // Success notification
-+ ".cc-success{position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#4caf50,#66bb6a);"
-+ "color:white;padding:12px 20px;border-radius:12px;box-shadow:0 8px 25px rgba(76,175,80,.3);"
-+ "transform:translateX(400px);transition:all .4s cubic-bezier(.16,1,.3,1);z-index:100010;"
-+ "font-weight:600;pointer-events:none;max-width:280px;word-wrap:break-word}"
-+ ".cc-success.cc-show{transform:translateX(0)}"
+      + ".cc-success{position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#4caf50,#66bb6a);"
+      + "color:white;padding:12px 20px;border-radius:12px;box-shadow:0 8px 25px rgba(76,175,80,.3);"
+      + "transform:translateX(400px);transition:all .4s cubic-bezier(.16,1,.3,1);z-index:100010;"
+      + "font-weight:600;pointer-events:none;max-width:280px;word-wrap:break-word}"
+      + ".cc-success.cc-show{transform:translateX(0)}"
       
       // Animations
       + "@keyframes cc-bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.9)}100%{transform:scale(1);opacity:1}}"
       
-      // Responsive ottimizzato per mobile
+      // Responsive - Mobile First
+      + "@media (max-width:768px){"
+      + "#cc-content{flex-direction:column;align-items:stretch;gap:12px}"
+      + "#cc-icon{align-self:flex-start}"
+      + "#cc-actions{flex-direction:row;justify-content:center;gap:6px}"
+      + "#cc-actions button{flex:1;min-width:0;font-size:.85rem;padding:9px 14px}"
+      + "#cc-manage{margin-top:0;align-self:stretch}"
+      + "#cc-links{justify-content:center;gap:8px;flex-wrap:wrap}"
+      + "}"
       + "@media (max-width:640px){"
-      + "#cc-banner{padding:1rem;border-radius:16px;width:90vw;max-height:88vh}"
-      + "#cc-banner h3{font-size:1.1rem;margin-bottom:1rem;line-height:1.2;padding-right:35px}"
-      + "#cc-banner p{margin:.6rem 0;padding:8px;font-size:.85rem;line-height:1.3}"
-      + "#cc-banner p svg{width:16px;height:16px}"
-      + "#cc-actions{flex-direction:column;gap:10px;margin-top:1rem}"
-      + "#cc-actions button{padding:12px 16px;font-size:.9rem;border-radius:10px;text-align:center;white-space:normal;word-wrap:break-word}"
-      + "#cc-links{margin:1rem 0 .8rem;gap:12px;font-size:.9rem;justify-content:center}"
-      + "#cc-docs-card{width:100vw;height:100dvh;border-radius:0}"
-      + "#cc-float{width:56px;height:56px;padding:4px}#cc-float img{width:44px;height:44px}"
-      + "#cc-card{padding:1.2rem;width:88%;margin:0 6%}"
-      + ".cc-row{padding:12px;margin:8px 0}"
-      + "#cc-close{top:12px;right:15px;width:32px;height:32px;font-size:14px}"
-      + ".cc-success{right:10px;top:15px;padding:10px 16px;font-size:.9rem;max-width:200px}"
+      + "#cc-banner{padding:12px 16px}"
+      + "#cc-content{gap:10px}"
+      + "#cc-title{font-size:.9rem}"
+      + "#cc-description{font-size:.8rem}"
+      + "#cc-instruction{font-size:.75rem}"
+      + "#cc-actions button{font-size:.8rem;padding:8px 12px;min-height:36px}"
+      + "#cc-links{font-size:.75rem;gap:6px}"
+      + "#cc-links a{padding:4px 8px}"
       + "}"
       + "@media (max-width:480px){"
-      + "#cc-banner{padding:.9rem;width:92vw;max-height:90vh}"
-      + "#cc-banner h3{font-size:1rem;margin-bottom:.8rem;padding-right:30px}"
-      + "#cc-banner p{margin:.5rem 0;padding:6px;font-size:.8rem}"
-      + "#cc-actions{gap:8px}"
-      + "#cc-actions button{font-size:.85rem;padding:11px 14px;min-height:44px}"
-      + "#cc-links{flex-wrap:wrap;justify-content:center;gap:8px}"
-      + "#cc-links a{font-size:.85rem;padding:6px 10px;min-height:36px;display:inline-block}"
-      + "#cc-float{left:calc(8px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));"
-      + "width:52px;height:52px;padding:4px}#cc-float img{width:40px;height:40px}"
-      + "#cc-card{padding:1rem;width:90%;margin:0 5%}"
-      + ".cc-row{padding:10px;font-size:.9rem}"
-      + ".cc-row input{transform:scale(1.2)}"
-      + "#cc-close{top:10px;right:12px;width:30px;height:30px;font-size:13px}"
-      + ".cc-success{right:8px;top:12px;padding:8px 12px;font-size:.85rem;max-width:180px}"
+      + "#cc-banner{padding:10px 12px}"
+      + "#cc-actions{gap:4px}"
+      + "#cc-actions button{font-size:.75rem;padding:7px 10px;min-height:34px}"
+      + "#cc-manage{font-size:.75rem;padding:6px 12px}"
       + "}"
       + "@media (max-width:360px){"
-      + "#cc-banner{padding:.8rem;border-radius:12px;width:94vw}"
-      + "#cc-banner h3{font-size:.95rem;margin-bottom:.6rem;padding-right:28px}"
-      + "#cc-banner p{margin:.4rem 0;padding:4px;font-size:.75rem}"
-      + "#cc-actions button{font-size:.8rem;padding:10px 12px;min-height:42px}"
-      + "#cc-links{gap:6px}"
-      + "#cc-links a{font-size:.8rem;padding:5px 8px;min-height:34px}"
-      + "#cc-float{width:48px;height:48px}#cc-float img{width:36px;height:36px}"
-      + "#cc-card{padding:.8rem;width:92%;margin:0 4%}"
-      + ".cc-row{padding:8px;font-size:.85rem}"
-      + "#cc-close{top:8px;right:10px;width:28px;height:28px;font-size:12px}"
-      + ".cc-success{right:6px;top:10px;padding:6px 10px;font-size:.8rem;max-width:160px}"
+      + "#cc-banner{padding:8px 10px}"
+      + "#cc-title{font-size:.85rem}"
+      + "#cc-description{font-size:.75rem}"
+      + "#cc-instruction{font-size:.7rem}"
+      + "#cc-actions button{font-size:.7rem;padding:6px 8px;min-height:32px}"
+      + "#cc-links{font-size:.7rem}"
       + "}"
-      + "@media (max-height:600px) and (max-width:640px){"
-      + "#cc-banner{max-height:92vh;overflow-y:auto}"
-      + "#cc-banner h3{font-size:1rem;margin-bottom:.5rem}"
-      + "#cc-banner p{margin:.3rem 0;padding:4px;font-size:.75rem;line-height:1.2}"
-      + "#cc-links{margin:.5rem 0;gap:4px}"
-      + "#cc-actions{gap:6px}"
-      + "}";
+      
+      // Compensazione per body quando banner è visibile
+      + "body.cc-banner-active{padding-top:var(--cc-banner-height,120px);transition:padding-top .4s ease}"
+      + "@media (max-width:768px){body.cc-banner-active{padding-top:var(--cc-banner-height,140px)}}"
+      + "@media (max-width:640px){body.cc-banner-active{padding-top:var(--cc-banner-height,160px)}}"
+      + "@media (max-width:480px){body.cc-banner-active{padding-top:var(--cc-banner-height,180px)}}";
 
     var style = document.createElement("style");
     style.textContent = css;
@@ -269,7 +257,7 @@
     successNotification.className = "cc-success";
     successNotification.textContent = "✅ Preferenze salvate!";
 
-    // Modale documenti (privacy/cookie) - IDENTICA ALL'ORIGINALE
+    // Modale documenti (privacy/cookie)
     var docsOverlay = document.createElement("div");
     docsOverlay.id = "cc-docs";
     docsOverlay.innerHTML = (
@@ -282,27 +270,29 @@
       + '</div>'
     );
 
-    // === Contenuto banner (TUO testo IDENTICO) ===
+    // === Contenuto banner NUOVO DESIGN ===
     banner.innerHTML = (
-      '<button id="cc-close" aria-label="Chiudi">✖</button>'
-      + '<h3>Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
-      + '<p>' + icoCookie + '<span>Utilizziamo i cookies per analizzare il traffico, mostrarti annunci personalizzati su siti di terze parti e fornirti funzionalità relative ai social media.</span></p>'
-      + '<p>' + icoWrench + '<span>Per fruire senza limiti delle funzionalità offerte da ALIMENTIAMO LA SALUTE, ti invitiamo a consentire tutti i cookies in CONFORMITÀ con la nostra POLICY per i COOKIES.</span></p>'
-      + '<p>' + icoPage   + '<span>Puoi modificare le tue preferenze in qualsiasi momento accedendo alle impostazioni sui cookies.</span></p>'
-      + '<p>' + icoPage   + '<span>Per maggiori dettagli, leggi la nostra Cookie Policy e la nostra Privacy Policy.</span></p>'
-      + '<p>' + icoCross  + '<span>Chiudendo questo banner con la X, verranno mantenuti solo i cookie tecnici necessari per il funzionamento del sito.</span></p>'
-      + '<div id="cc-links">'
-      +   '<a id="cc-privacy" href="' + PRIVACY_URL + '">Informativa sulla privacy</a>'
-      +   '<a id="cc-cookie"  href="' + COOKIE_URL  + '">Informativa sui cookie</a>'
-      +   (DATA_REQUEST_URL ? '<a id="cc-data" href="' + DATA_REQUEST_URL + '">Richiesta dei tuoi dati</a>' : '')
-      + '</div>'
-      + '<div id="cc-actions">'
-      +   '<button id="cc-manage">Gestisci le impostazioni</button>'
-      +   '<button id="cc-accept">Accetta tutti</button>'
+      '<div id="cc-content">'
+      +   '<div id="cc-icon">' + icoCookie + '</div>'
+      +   '<div id="cc-text">'
+      +     '<h3 id="cc-title">Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
+      +     '<p id="cc-description">Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per altre finalità come specificato nella <a href="' + COOKIE_URL + '" id="cc-cookie-inline">cookie policy</a>.</p>'
+      +     '<p id="cc-instruction">Usa il pulsante "Accetta" per acconsentire. Usa il pulsante "Rifiuta" o chiudi questa informativa per continuare senza accettare.</p>'
+      +     '<div id="cc-links">'
+      +       '<a id="cc-privacy" href="' + PRIVACY_URL + '">Info privacy</a>'
+      +       '<a id="cc-cookie" href="' + COOKIE_URL + '">Info cookie</a>'
+      +       (DATA_REQUEST_URL ? '<a id="cc-data" href="' + DATA_REQUEST_URL + '">Richiesta dati</a>' : '')
+      +     '</div>'
+      +   '</div>'
+      +   '<div id="cc-actions">'
+      +     '<button id="cc-reject">Rifiuta</button>'
+      +     '<button id="cc-accept">Accetta</button>'
+      +     '<button id="cc-manage">Gestisci le impostazioni</button>'
+      +   '</div>'
       + '</div>'
     );
 
-    // Modale preferenze (Necessari locked) - IDENTICA ALL'ORIGINALE
+    // Modale preferenze (invariata)
     var modal = document.createElement("div");
     modal.id = "cc-modal";
     modal.innerHTML = (
@@ -318,7 +308,7 @@
       + '</div>'
     );
 
-    // Bottone flottante per riaprire il BANNER - IDENTICO ALL'ORIGINALE
+    // Bottone flottante (invariato)
     var floatBtn = document.createElement("button");
     floatBtn.id = "cc-float";
     floatBtn.type = "button";
@@ -328,37 +318,44 @@
       window.CC_openConsent();
     });
 
-    // ======= VISIBILITY HELPERS MODERNIZZATI =======
+    // ======= VISIBILITY HELPERS AGGIORNATI =======
     function show(el){ 
       el.style.display = "block"; 
       setTimeout(function() { el.classList.add("cc-show"); }, 10);
     }
     function hide(el){ 
       el.classList.remove("cc-show");
-      setTimeout(function() { el.style.display = "none"; }, 300);
+      setTimeout(function() { el.style.display = "none"; }, 400);
     }
 
+    // NON BLOCCHIAMO PIÙ LO SCROLL per GDPR compliance
+    function showBanner() { 
+      show(banner);
+      hide(modal); 
+      hide(docsOverlay);
+      
+      // Calcola e applica padding-top al body
+      setTimeout(function() {
+        var bannerHeight = banner.offsetHeight;
+        document.documentElement.style.setProperty('--cc-banner-height', bannerHeight + 'px');
+        document.body.classList.add('cc-banner-active');
+      }, 10);
+    }
+    
+    function hideBanner() { 
+      hide(banner);
+      document.body.classList.remove('cc-banner-active');
+      document.documentElement.style.removeProperty('--cc-banner-height');
+    }
+
+    // Modali mantengono il backdrop e lock scroll
     function lockScroll(){ document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden"; }
     function unlockScroll(){ document.documentElement.style.overflow = ""; document.body.style.overflow = ""; }
 
-    function showBanner() { 
-      show(backdrop); 
-      show(banner); 
-      hide(modal); 
-      hide(docsOverlay); 
-      lockScroll(); 
-    }
-    function hideBanner() { 
-      hide(backdrop); 
-      hide(banner); 
-      unlockScroll(); 
-    }
-
-    // 👉 FIX centratura modali: display:flex CON ANIMAZIONI
     function showModal()  { 
-      backdrop.style.display="block"; 
-      banner.classList.remove("cc-show");
-      docsOverlay.classList.remove("cc-show");
+      show(backdrop);
+      hide(banner); 
+      hide(docsOverlay);
       modal.style.display="flex"; 
       setTimeout(function() { 
         backdrop.classList.add("cc-show");
@@ -372,9 +369,9 @@
       unlockScroll(); 
     }
     function showDocs()   { 
-      backdrop.style.display="block"; 
-      banner.classList.remove("cc-show");
-      modal.classList.remove("cc-show");
+      show(backdrop);
+      hide(banner);
+      hide(modal);
       docsOverlay.style.display="flex"; 
       setTimeout(function() { 
         backdrop.classList.add("cc-show");
@@ -384,9 +381,12 @@
     }
     function hideDocs()   { 
       hide(docsOverlay); 
-      show(banner); 
-      show(backdrop); 
-      lockScroll(); 
+      hide(backdrop);
+      unlockScroll();
+      // Riapri il banner originale (GDPR compliant)
+      setTimeout(function() {
+        showBanner();
+      }, 100);
     }
 
     function showFloat(){ 
@@ -405,10 +405,10 @@
       successNotification.classList.add('cc-show');
       setTimeout(function() {
         successNotification.classList.remove('cc-show');
-      }, 1000);
+      }, 2000);
     }
 
-    // ======= CONSENT STATE (IDENTICO ALL'ORIGINALE) =======
+    // ======= CONSENT STATE (invariato) =======
     function readConsent() {
       var v = getCookie(COOKIE_NAME);
       var res = { marketing: false, statistics: false };
@@ -471,7 +471,7 @@
       applyConsentToUI(consent); // sincronizza subito la UI
     }
 
-    // ======= MOUNT (IDENTICO ALL'ORIGINALE CON SUCCESS MESSAGES) =======
+    // ======= EVENT HANDLERS AGGIORNATI =======
     function wire() {
       // ACCETTA TUTTI -> marketing=true & statistics=true
       document.getElementById("cc-accept").addEventListener("click", function () {
@@ -481,187 +481,185 @@
         hideBanner();
       });
       
-      // X -> solo tecnici (LOGICA ORIGINALE)
-      document.getElementById("cc-close").addEventListener("click", function () {
-        var existing = getCookie(COOKIE_NAME);
-        if (!existing) {
-          // prima volta → solo tecnici
-          store(false, false);
-          showSuccess("❌ Solo cookie tecnici attivi");
-        } else {
-          // X successiva → NON toccare le preferenze
-          // (solo chiudi; lasciamo invariato quanto già scelto)
-          showSuccess("✅ Preferenze mantenute");
-        }
+      // RIFIUTA -> solo tecnici (NUOVO comportamento GDPR compliant)
+      document.getElementById("cc-reject").addEventListener("click", function () {
+        store(false, false);
+        showSuccess("❌ Solo cookie necessari attivi");
         showFloat();
         hideBanner();
       });
 
-     // GESTISCI (sincronizza prima di aprire)
-document.getElementById("cc-manage").addEventListener("click", function () {
-  applyConsentToUI(readConsent());
-  showModal();
-});
-document.getElementById("cc-cancel").addEventListener("click", function(){ 
-  hideModal();
-  setTimeout(function() {
-    showBanner();
-  }, 100);
-});
+      // GESTISCI (sincronizza prima di aprire)
+      document.getElementById("cc-manage").addEventListener("click", function () {
+        applyConsentToUI(readConsent());
+        showModal();
+      });
+      
+      document.getElementById("cc-cancel").addEventListener("click", function(){ 
+        hideModal();
+        setTimeout(function() {
+          showBanner();
+        }, 100);
+      });
 
       // SALVA PREFERENZE
       document.getElementById("cc-save").addEventListener("click", function () {
-  var m = document.getElementById("cc-marketing").checked;
-  var s = document.getElementById("cc-statistics").checked;
-  store(m, s);
-  
-  // Success message personalizzato
-  var message = "💾 Preferenze salvate: ";
-  if (m && s) {
-    message += "Marketing + Statistiche";
-  } else if (m) {
-    message += "Solo Marketing";
-  } else if (s) {
-    message += "Solo Statistiche";
-  } else {
-    message += "Solo cookie necessari";
-  }
-  
-  showFloat();
-  hideModal();
-  hideBanner();
-  
-  // ✅ FIX: Ritarda la notifica di 400ms per evitare conflitti con le animazioni di chiusura
-  setTimeout(function() {
-    showSuccess(message);
-  }, 400);
-});
+        var m = document.getElementById("cc-marketing").checked;
+        var s = document.getElementById("cc-statistics").checked;
+        store(m, s);
+        
+        // Success message personalizzato
+        var message = "💾 Preferenze salvate: ";
+        if (m && s) {
+          message += "Marketing + Statistiche";
+        } else if (m) {
+          message += "Solo Marketing";
+        } else if (s) {
+          message += "Solo Statistiche";
+        } else {
+          message += "Solo cookie necessari";
+        }
+        
+        showFloat();
+        hideModal();
+        hideBanner();
+        
+        // Ritarda la notifica per evitare conflitti con le animazioni
+        setTimeout(function() {
+          showSuccess(message);
+        }, 400);
+      });
 
-      // Link privacy/cookie → modale docs (IDENTICO ALL'ORIGINALE)
+      // Link privacy/cookie → modale docs
       document.getElementById("cc-privacy").addEventListener("click", function(e){
         e.preventDefault(); 
-        openDocs(PRIVACY_URL, "Informativa sulla privacy");
+        openDocs(PRIVACY_URL, "Info privacy");
       });
       document.getElementById("cc-cookie").addEventListener("click", function(e){
         e.preventDefault(); 
-        openDocs(COOKIE_URL, "Informativa sui cookie");
+        openDocs(COOKIE_URL, "Info cookie");
       });
+      // Gestisci anche il link inline nella descrizione
+      document.getElementById("cc-cookie-inline").addEventListener("click", function(e){
+        e.preventDefault(); 
+        openDocs(COOKIE_URL, "Info cookie");
+      });
+      
       if (DATA_REQUEST_URL) {
         var dataLink = document.getElementById("cc-data");
         if (dataLink) dataLink.addEventListener("click", function(e){
           e.preventDefault(); 
-          openDocs(DATA_REQUEST_URL, "Richiesta dei tuoi dati");
+          openDocs(DATA_REQUEST_URL, "Richiesta dati");
         });
       }
 
-      // Docs modal handlers (IDENTICO ALL'ORIGINALE)
+      // Docs modal handlers
       document.getElementById("cc-docs-close").addEventListener("click", function(){ hideDocs(); });
       docsOverlay.addEventListener("click", function(e){ if (e.target === docsOverlay) hideDocs(); });
+      
+      // Gestione tastiera
       document.addEventListener("keydown", function(e){
         if (e.key === "Escape") {
           if (docsOverlay.style.display === "flex") hideDocs();
-          else if (modal.style.display === "flex") hideModal();
-          else if (banner.style.display === "block") hideBanner();
+          else if (modal.style.display === "flex") {
+            hideModal();
+            setTimeout(function() { showBanner(); }, 100);
+          }
+          // NON chiudiamo più il banner principale con ESC per GDPR compliance
         }
       });
     }
 
     function openDocs(url, title){
-  if (!OPEN_DOCS_IN_MODAL) { 
-    window.open(url, "_blank", "noopener"); 
-    return; 
-  }
-  
-  document.getElementById("cc-docs-title").textContent = title || "Informativa";
-  var ifr = document.getElementById("cc-docs-iframe");
-  ifr.src = url;
-  
-  ifr.onload = function () {
-    try {
-      var d = ifr.contentDocument || ifr.contentWindow.document;
-      var s = d.createElement("style");
-      s.textContent =
-        "html,body{max-width:100%;overflow-x:auto!important;scroll-behavior:smooth}" +
-        "img,video,iframe,table{max-width:100%;height:auto}" +
-        ".container,.wrap,.content{max-width:100%!important}";
-      d.head && d.head.appendChild(s);
-      
-      // Reset scroll position
-      d.documentElement.scrollTop = 0;
-      d.body.scrollTop = 0;
-      
-      // Intercetta SOLO i link che NON hanno onclick con navigateToPage
-      var links = d.querySelectorAll('a[href]');
-      for (var i = 0; i < links.length; i++) {
-        var link = links[i];
-        var href = link.getAttribute('href');
-        var onclick = link.getAttribute('onclick');
-        
-        // Skip link che già usano navigateToPage
-        if (onclick && onclick.indexOf('navigateToPage') > -1) {
-          continue;
-        }
-        
-        // Solo link relativi o che contengono privacy/cookie
-        if (href && (
-          !href.startsWith('http') || // link relativi
-          href.indexOf('privacy') > -1 || 
-          href.indexOf('cookie') > -1
-        )) {
-          
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            
-            var targetHref = this.getAttribute('href');
-            
-            // Se è un anchor link interno (#sezione)
-            if (targetHref.startsWith('#')) {
-              var targetElement = d.querySelector(targetHref);
-              if (targetElement) {
-                targetElement.scrollIntoView({ 
-                  behavior: 'smooth', 
-                  block: 'start' 
-                });
-              }
-              return;
-            }
-            
-            // Determina il nuovo titolo
-            var newTitle = "Informativa";
-            if (targetHref.indexOf('cookie') > -1) {
-              newTitle = "Informativa sui cookie";
-            } else if (targetHref.indexOf('privacy') > -1) {
-              newTitle = "Informativa sulla privacy";
-            }
-            
-            // Aggiorna il modal
-            document.getElementById("cc-docs-title").textContent = newTitle;
-            
-            // Carica la nuova pagina con un piccolo delay
-            setTimeout(function() {
-              ifr.src = targetHref;
-            }, 10);
-          });
-        }
+      if (!OPEN_DOCS_IN_MODAL) { 
+        window.open(url, "_blank", "noopener"); 
+        return; 
       }
       
-    } catch(e) {
-      console.log("[cookie-consent] Cannot modify iframe content:", e);
+      document.getElementById("cc-docs-title").textContent = title || "Informativa";
+      var ifr = document.getElementById("cc-docs-iframe");
+      ifr.src = url;
+      
+      ifr.onload = function () {
+        try {
+          var d = ifr.contentDocument || ifr.contentWindow.document;
+          var s = d.createElement("style");
+          s.textContent =
+            "html,body{max-width:100%;overflow-x:auto!important;scroll-behavior:smooth}" +
+            "img,video,iframe,table{max-width:100%;height:auto}" +
+            ".container,.wrap,.content{max-width:100%!important}";
+          d.head && d.head.appendChild(s);
+          
+          // Reset scroll position
+          d.documentElement.scrollTop = 0;
+          d.body.scrollTop = 0;
+          
+          // Intercetta SOLO i link che NON hanno onclick con navigateToPage
+          var links = d.querySelectorAll('a[href]');
+          for (var i = 0; i < links.length; i++) {
+            var link = links[i];
+            var href = link.getAttribute('href');
+            var onclick = link.getAttribute('onclick');
+            
+            // Skip link che già usano navigateToPage
+            if (onclick && onclick.indexOf('navigateToPage') > -1) {
+              continue;
+            }
+            
+            // Solo link relativi o che contengono privacy/cookie
+            if (href && (
+              !href.startsWith('http') || // link relativi
+              href.indexOf('privacy') > -1 || 
+              href.indexOf('cookie') > -1
+            )) {
+              
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                var targetHref = this.getAttribute('href');
+                
+                // Se è un anchor link interno (#sezione)
+                if (targetHref.startsWith('#')) {
+                  var targetElement = d.querySelector(targetHref);
+                  if (targetElement) {
+                    targetElement.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'start' 
+                    });
+                  }
+                  return;
+                }
+                
+                // Determina il nuovo titolo
+                var newTitle = "Informativa";
+                if (targetHref.indexOf('cookie') > -1) {
+                  newTitle = "Info cookie";
+                } else if (targetHref.indexOf('privacy') > -1) {
+                  newTitle = "Info privacy";
+                }
+                
+                // Aggiorna il modal
+                document.getElementById("cc-docs-title").textContent = newTitle;
+                
+                // Carica la nuova pagina con un piccolo delay
+                setTimeout(function() {
+                  ifr.src = targetHref;
+                }, 10);
+              });
+            }
+          }
+          
+        } catch(e) {
+          console.log("[cookie-consent] Cannot modify iframe content:", e);
+        }
+      };
+      
+      showDocs();
     }
-  };
-  
-  showDocs();
-}
     
-    function resolveUrl(baseUrl, relativeUrl) {
-  if (relativeUrl.indexOf('http') === 0) return relativeUrl;
-  var base = new URL(baseUrl);
-  return new URL(relativeUrl, base.origin).href;
-}
     function mount() {
-      // inietta CSS + DOM una sola volta (IDENTICO ALL'ORIGINALE)
-      document.head.appendChild(style);
+      // Inietta CSS + DOM una sola volta
       document.body.appendChild(backdrop);
       document.body.appendChild(banner);
       document.body.appendChild(modal);
@@ -670,7 +668,7 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
 
       wire();
 
-      // Se consenso già presente → mostra solo bottone e sincronizza UI (IDENTICO ALL'ORIGINALE)
+      // Se consenso già presente → mostra solo bottone e sincronizza UI
       var existing = getCookie(COOKIE_NAME);
       if (existing) {
         var c = readConsent();
@@ -684,38 +682,44 @@ document.getElementById("cc-cancel").addEventListener("click", function(){
       showBanner();
     }
 
-    // API per riaprire il BANNER principale (IDENTICA ALL'ORIGINALE)
-    window.CC_openConsent = function () { showBanner(); };
+    // ======= API PUBBLICHE =======
+    
+    // API per riaprire il BANNER principale (NON le preferenze)
+    window.CC_openConsent = function () { 
+      // Riapre sempre il banner principale per GDPR compliance
+      showBanner(); 
+    };
+    
     window.CC_navigateModal = function(url, title) {
-  var modal = document.getElementById("cc-docs");
-  if (modal && modal.style.display === "flex") {
-    document.getElementById("cc-docs-title").textContent = title || "Informativa";
-    var ifr = document.getElementById("cc-docs-iframe");
-    ifr.src = url;
-    return true;
-  }
-  return false;
-};
+      var modal = document.getElementById("cc-docs");
+      if (modal && modal.style.display === "flex") {
+        document.getElementById("cc-docs-title").textContent = title || "Informativa";
+        var ifr = document.getElementById("cc-docs-iframe");
+        ifr.src = url;
+        return true;
+      }
+      return false;
+    };
 
-    // Aggiungi questo dopo window.CC_navigateModal
-window.addEventListener('message', function(event) {
-  // Verifica l'origine per sicurezza
-  if (event.origin !== 'https://www.alimentiamolasalute.org' && 
-      event.origin !== 'https://alimentiamolasalute.org') {
-    return;
-  }
-  
-  if (event.data.type === 'NAVIGATE_MODAL' && event.data.url && event.data.title) {
-    var modal = document.getElementById("cc-docs");
-    if (modal && modal.style.display === "flex") {
-      document.getElementById("cc-docs-title").textContent = event.data.title;
-      var ifr = document.getElementById("cc-docs-iframe");
-      ifr.src = event.data.url;
-    }
-  }
-});
+    // Message listener per navigazione modal
+    window.addEventListener('message', function(event) {
+      // Verifica l'origine per sicurezza
+      if (event.origin !== 'https://www.alimentiamolasalute.org' && 
+          event.origin !== 'https://alimentiamolasalute.org') {
+        return;
+      }
+      
+      if (event.data.type === 'NAVIGATE_MODAL' && event.data.url && event.data.title) {
+        var modal = document.getElementById("cc-docs");
+        if (modal && modal.style.display === "flex") {
+          document.getElementById("cc-docs-title").textContent = event.data.title;
+          var ifr = document.getElementById("cc-docs-iframe");
+          ifr.src = event.data.url;
+        }
+      }
+    });
 
-    // Ready (IDENTICO ALL'ORIGINALE)
+    // Ready
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", mount, { once: true });
     } else {
@@ -726,15 +730,3 @@ window.addEventListener('message', function(event) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
-
-
-
-
-
-
-
-
-
-
-
-
