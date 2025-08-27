@@ -75,7 +75,7 @@
       + "padding:16px 20px;color:#1a1a1a;"
       + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;"
       + "display:none;opacity:0;transform:translateY(-100%);transition:all .4s cubic-bezier(.16,1,.3,1);"
-      + "-webkit-text-size-adjust:100%;max-width:100%;box-sizing:border-box}"
+      + "-webkit-text-size-adjust:100%;max-width:100%;box-sizing:border-box;position:relative}"
       + "#cc-banner.cc-show{opacity:1;transform:translateY(0)}"
       
       // Gradient top border
@@ -83,10 +83,10 @@
       + "background:linear-gradient(90deg,#2e7d32,#4caf50,#66bb6a)}"
       
       // Container principale - layout flexibile
-      + "#cc-content{display:flex;align-items:center;gap:16px;max-width:1200px;margin:0 auto}"
+      + "#cc-content{display:flex;align-items:flex-start;gap:16px;max-width:1200px;margin:0 auto}"
       
       // Icona cookie
-      + "#cc-icon{flex:0 0 auto;display:flex;align-items:center;color:#2e7d32}"
+      + "#cc-icon{flex:0 0 auto;display:flex;align-items:center;color:#2e7d32;margin-top:2px}"
       
       // Testo principale
       + "#cc-text{flex:1 1 auto;min-width:0}"
@@ -191,7 +191,12 @@
       + "#cc-float:hover img{transform:scale(1.08)}"
       + "#cc-float:focus-visible{outline:2px solid #8dd;outline-offset:3px}"
       
-      // Success notification
+      // Close button modernizzato
+      + "#cc-close{position:absolute;top:12px;right:16px;background:rgba(0,0,0,.05);border:none;"
+      + "width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;"
+      + "justify-content:center;transition:all .2s ease;color:#666;font-size:14px;z-index:1}"
+      + "#cc-close:hover{background:rgba(0,0,0,.1);transform:scale(1.1);color:#333}"
+      + "#cc-close:focus-visible{outline:2px solid #2e7d32;outline-offset:2px}"
       + ".cc-success{position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#4caf50,#66bb6a);"
       + "color:white;padding:12px 20px;border-radius:12px;box-shadow:0 8px 25px rgba(76,175,80,.3);"
       + "transform:translateX(400px);transition:all .4s cubic-bezier(.16,1,.3,1);z-index:100010;"
@@ -203,11 +208,13 @@
       
       // Responsive - Mobile First
       + "@media (max-width:768px){"
-      + "#cc-content{flex-direction:column;align-items:stretch;gap:12px}"
-      + "#cc-icon{align-self:flex-start}"
-      + "#cc-actions{flex-direction:row;justify-content:center;gap:6px}"
-      + "#cc-actions button{flex:1;min-width:0;font-size:.85rem;padding:9px 14px}"
-      + "#cc-manage{margin-top:0;align-self:stretch}"
+      + "#cc-content{flex-direction:row;align-items:flex-start;gap:12px}"
+      + "#cc-icon{align-self:flex-start;margin-top:0}"
+      + "#cc-text{flex:1}"
+      + "#cc-actions{flex-direction:column;justify-content:center;gap:8px;margin-top:8px;width:100%}"
+      + "#cc-actions .cc-primary-actions{display:flex;gap:6px}"
+      + "#cc-actions .cc-primary-actions button{flex:1;min-width:0;font-size:.85rem;padding:9px 14px}"
+      + "#cc-manage{margin-top:0;align-self:stretch;width:100%}"
       + "#cc-links{justify-content:center;gap:8px;flex-wrap:wrap}"
       + "}"
       + "@media (max-width:640px){"
@@ -219,12 +226,14 @@
       + "#cc-actions button{font-size:.8rem;padding:8px 12px;min-height:36px}"
       + "#cc-links{font-size:.75rem;gap:6px}"
       + "#cc-links a{padding:4px 8px}"
+      + "#cc-close{top:8px;right:12px;width:28px;height:28px;font-size:12px}"
       + "}"
       + "@media (max-width:480px){"
       + "#cc-banner{padding:10px 12px}"
       + "#cc-actions{gap:4px}"
       + "#cc-actions button{font-size:.75rem;padding:7px 10px;min-height:34px}"
       + "#cc-manage{font-size:.75rem;padding:6px 12px}"
+      + "#cc-close{top:6px;right:10px;width:26px;height:26px;font-size:11px}"
       + "}"
       + "@media (max-width:360px){"
       + "#cc-banner{padding:8px 10px}"
@@ -233,6 +242,7 @@
       + "#cc-instruction{font-size:.7rem}"
       + "#cc-actions button{font-size:.7rem;padding:6px 8px;min-height:32px}"
       + "#cc-links{font-size:.7rem}"
+      + "#cc-close{top:4px;right:8px;width:24px;height:24px;font-size:10px}"
       + "}"
       
       // Compensazione per body quando banner è visibile
@@ -272,7 +282,8 @@
 
     // === Contenuto banner NUOVO DESIGN ===
     banner.innerHTML = (
-      '<div id="cc-content">'
+      '<button id="cc-close" aria-label="Chiudi banner cookie">✖</button>'
+      + '<div id="cc-content">'
       +   '<div id="cc-icon">' + icoCookie + '</div>'
       +   '<div id="cc-text">'
       +     '<h3 id="cc-title">Il sito di ALIMENTIAMO LA SALUTE utilizza COOKIES per migliorare la tua esperienza.</h3>'
@@ -285,8 +296,10 @@
       +     '</div>'
       +   '</div>'
       +   '<div id="cc-actions">'
-      +     '<button id="cc-reject">Rifiuta</button>'
-      +     '<button id="cc-accept">Accetta</button>'
+      +     '<div class="cc-primary-actions">'
+      +       '<button id="cc-reject">Rifiuta</button>'
+      +       '<button id="cc-accept">Accetta</button>'
+      +     '</div>'
       +     '<button id="cc-manage">Gestisci le impostazioni</button>'
       +   '</div>'
       + '</div>'
@@ -483,6 +496,14 @@
       
       // RIFIUTA -> solo tecnici (NUOVO comportamento GDPR compliant)
       document.getElementById("cc-reject").addEventListener("click", function () {
+        store(false, false);
+        showSuccess("❌ Solo cookie necessari attivi");
+        showFloat();
+        hideBanner();
+      });
+
+      // X -> comportamento identico a RIFIUTA per GDPR compliance
+      document.getElementById("cc-close").addEventListener("click", function () {
         store(false, false);
         showSuccess("❌ Solo cookie necessari attivi");
         showFloat();
