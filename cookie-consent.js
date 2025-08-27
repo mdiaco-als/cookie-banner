@@ -68,18 +68,18 @@
 
     // ======= CSS MODERNIZZATO NON INVASIVO =======
     var css = ""
-      // Banner posizionato in alto, NON blocca scroll
+      // Banner più compatto e padding ridotto
       + "#cc-banner{position:fixed;top:0;left:0;right:0;z-index:100001;"
       + "background:rgba(255,255,255,.98);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);"
       + "border-bottom:1px solid rgba(46,125,50,.15);box-shadow:0 4px 20px rgba(0,0,0,.1);"
-      + "padding:16px 20px;color:#1a1a1a;"
+      + "padding:12px 16px;color:#1a1a1a;"
       + "font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;"
       + "display:none;opacity:0;transform:translateY(-100%);transition:all .4s cubic-bezier(.16,1,.3,1);"
       + "-webkit-text-size-adjust:100%;max-width:100%;box-sizing:border-box;position:relative}"
       + "#cc-banner.cc-show{opacity:1;transform:translateY(0)}"
       
-      // Gradient top border
-      + "#cc-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;"
+      // Gradient top border ridotto
+      + "#cc-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;"
       + "background:linear-gradient(90deg,#2e7d32,#4caf50,#66bb6a)}"
       
       // Container principale - layout flexibile
@@ -92,8 +92,8 @@
       // Testo principale
       + "#cc-text{flex:1 1 auto;min-width:0}"
       + "#cc-title{margin:0 0 6px;color:#2e7d32;font-size:1rem;font-weight:700;line-height:1.3}"
-      + "#cc-description{margin:0 0 8px;font-size:.9rem;line-height:1.4;color:#333}"
-      + "#cc-instruction{margin:0;font-size:.85rem;line-height:1.3;color:#666}"
+      + "#cc-description{margin:0 0 8px;font-size:.9rem;line-height:1.4;color:#333;white-space:normal;overflow-wrap:anywhere}"
+      + "#cc-instruction{margin:0;font-size:.85rem;line-height:1.35;color:#666;white-space:normal;overflow-wrap:anywhere}"
       
       // Links footer
       + "#cc-links{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem}"
@@ -246,11 +246,11 @@
       + "#cc-close{top:4px;right:8px;width:24px;height:24px;font-size:10px}"
       + "}"
       
-      // Compensazione per body quando banner è visibile
-      + "body.cc-banner-active{padding-top:var(--cc-banner-height,120px);transition:padding-top .4s ease}"
-      + "@media (max-width:768px){body.cc-banner-active{padding-top:var(--cc-banner-height,140px)}}"
-      + "@media (max-width:640px){body.cc-banner-active{padding-top:var(--cc-banner-height,160px)}}"
-      + "@media (max-width:480px){body.cc-banner-active{padding-top:var(--cc-banner-height,180px)}}";
+      // Compensazione per body quando banner è visibile (valori ridotti)
+      + "body.cc-banner-active{padding-top:var(--cc-banner-height,60px);transition:padding-top .4s ease}"
+      + "@media (max-width:768px){body.cc-banner-active{padding-top:var(--cc-banner-height,70px)}}"
+      + "@media (max-width:640px){body.cc-banner-active{padding-top:var(--cc-banner-height,80px)}}"
+      + "@media (max-width:480px){body.cc-banner-active{padding-top:var(--cc-banner-height,85px)}}";
 
     var style = document.createElement("style");
     style.textContent = css;
