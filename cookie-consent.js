@@ -1,4 +1,4 @@
-// cookie-consent.js — versione semplificata e funzionante
+// cookie-consent.js — versione semplificata e funzionante (con fix scroll modale privacy)
 (function () {
   "use strict";
   try {
@@ -63,7 +63,7 @@
       console.log("[cookie-consent] pushed:", payload);
     }
 
-    // ======= CSS SEMPLIFICATO CON BOTTONI MOBILE CORRETTI =======
+    // ======= CSS =======
     var css = `
       /* Banner principale - SEMPLICE */
       #cc-banner {
@@ -154,284 +154,134 @@
         cursor: pointer;
         transition: all 0.2s ease;
       }
-      #cc-reject {
-        background: #f44336;
-        color: white;
-      }
-      #cc-reject:hover {
-        background: #d32f2f;
-      }
-      #cc-accept {
-        background: #4caf50;
-        color: white;
-      }
-      #cc-accept:hover {
-        background: #388e3c;
-      }
+      #cc-reject { background: #f44336; color: white; }
+      #cc-reject:hover { background: #d32f2f; }
+      #cc-accept { background: #4caf50; color: white; }
+      #cc-accept:hover { background: #388e3c; }
       #cc-manage {
-        background: #f5f5f5;
-        color: #333;
-        border: 1px solid #ddd;
-        font-size: 13px;
-        padding: 6px 12px;
+        background: #f5f5f5; color: #333; border: 1px solid #ddd;
+        font-size: 13px; padding: 6px 12px;
       }
-      #cc-manage:hover {
-        background: #eee;
-      }
+      #cc-manage:hover { background: #eee; }
       
       /* Close button */
       #cc-close {
-        position: absolute;
-        top: -6px;
-        right: -6px;
-        width: 24px;
-        height: 24px;
-        border: none;
-        border-radius: 50%;
-        background: rgba(0,0,0,0.1);
-        color: #666;
-        font-size: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        position: absolute; top: -6px; right: -6px;
+        width: 24px; height: 24px; border: none; border-radius: 50%;
+        background: rgba(0,0,0,0.1); color: #666; font-size: 12px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
       }
-      #cc-close:hover {
-        background: rgba(0,0,0,0.2);
-        color: #333;
-      }
+      #cc-close:hover { background: rgba(0,0,0,0.2); color: #333; }
       
-      /* MOBILE - layout verticale con bottoni 50% (MODIFICA RICHIESTA) */
+      /* MOBILE - layout verticale con bottoni 50% */
       @media (max-width: 768px) {
-        #cc-container {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 12px;
-        }
-        
-        #cc-header {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-        }
-        
-        #cc-icon {
-          margin-top: 2px;
-        }
-        
-        #cc-buttons {
-          flex-direction: column;
-          gap: 8px;
-          width: 100%; /* prende tutta la larghezza */
-        }
-        
-        #cc-primary {
-          display: flex;
-          gap: 8px;
-          width: 100%; /* riga piena */
-        }
-        
-        /* Bottoni che si espandono: 50% ciascuno e full width */
+        #cc-container { flex-direction: column; align-items: stretch; gap: 12px; }
+        #cc-header { display: flex; align-items: flex-start; gap: 10px; }
+        #cc-icon { margin-top: 2px; }
+        #cc-buttons { flex-direction: column; gap: 8px; width: 100%; }
+        #cc-primary { display: flex; gap: 8px; width: 100%; }
         #cc-primary button {
-          flex: 1 1 50%;
-          min-width: 0;
-          width: 100%;
-          padding: 12px 8px;
-          font-size: 14px;
-          box-sizing: border-box;
+          flex: 1 1 50%; min-width: 0; width: 100%;
+          padding: 12px 8px; font-size: 14px; box-sizing: border-box;
         }
-        
-        #cc-manage {
-          width: 100%;
-          padding: 10px 16px;
-          font-size: 14px;
-        }
+        #cc-manage { width: 100%; padding: 10px 16px; font-size: 14px; }
       }
       
       /* MOBILE piccolo */
       @media (max-width: 480px) {
-        #cc-banner {
-          padding: 10px 12px;
-        }
-        #cc-title {
-          font-size: 14px;
-        }
-        #cc-desc {
-          font-size: 13px;
-        }
-        #cc-instr, #cc-links a {
-          font-size: 12px;
-        }
-        #cc-primary button {
-          font-size: 13px;
-          padding: 11px 8px;
-        }
-        #cc-manage {
-          font-size: 13px;
-          padding: 9px 14px;
-        }
+        #cc-banner { padding: 10px 12px; }
+        #cc-title { font-size: 14px; }
+        #cc-desc { font-size: 13px; }
+        #cc-instr, #cc-links a { font-size: 12px; }
+        #cc-primary button { font-size: 13px; padding: 11px 8px; }
+        #cc-manage { font-size: 13px; padding: 9px 14px; }
       }
       
       /* Backdrop per modali */
       #cc-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 100000;
-        background: rgba(0,0,0,0.6);
-        display: none;
-        opacity: 0;
+        position: fixed; inset: 0; z-index: 100000;
+        background: rgba(0,0,0,0.6); display: none; opacity: 0;
         transition: opacity 0.3s ease;
       }
-      #cc-backdrop.cc-show {
-        opacity: 1;
-      }
+      #cc-backdrop.cc-show { opacity: 1; }
       
       /* Modal preferenze */
       #cc-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 100002;
-        display: none;
-        align-items: center;
-        justify-content: center;
+        position: fixed; inset: 0; z-index: 100002;
+        display: none; align-items: center; justify-content: center;
       }
       #cc-card {
-        background: white;
-        border-radius: 12px;
-        padding: 24px;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        background: white; border-radius: 12px; padding: 24px;
+        max-width: 400px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       }
-      #cc-card h3 {
-        margin: 0 0 16px 0;
-        color: #2e7d32;
-        font-size: 18px;
-      }
+      #cc-card h3 { margin: 0 0 16px 0; color: #2e7d32; font-size: 18px; }
       .cc-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 12px 0;
-        padding: 12px;
-        background: #f9f9f9;
-        border-radius: 8px;
+        display: flex; align-items: center; gap: 12px; margin: 12px 0;
+        padding: 12px; background: #f9f9f9; border-radius: 8px;
       }
-      .cc-row input {
-        transform: scale(1.2);
-      }
-      .cc-row label {
-        flex: 1;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      #cc-modal-buttons {
-        margin-top: 20px;
-        display: flex;
-        gap: 12px;
-      }
+      .cc-row input { transform: scale(1.2); }
+      .cc-row label { flex: 1; font-weight: 600; cursor: pointer; }
+      #cc-modal-buttons { margin-top: 20px; display: flex; gap: 12px; }
       #cc-save {
-        background: #4caf50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
+        background: #4caf50; color: white; border: none;
+        padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;
       }
       #cc-cancel {
-        background: #f5f5f5;
-        color: #333;
-        border: 1px solid #ddd;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
+        background: #f5f5f5; color: #333; border: 1px solid #ddd;
+        padding: 10px 20px; border-radius: 6px; cursor: pointer;
       }
       
       /* Modal docs */
       #cc-docs {
-        position: fixed;
-        inset: 0;
-        z-index: 100003;
-        background: rgba(0,0,0,0.6);
-        display: none;
-        align-items: center;
-        justify-content: center;
+        position: fixed; inset: 0; z-index: 100003;
+        background: rgba(0,0,0,0.6); display: none;
+        align-items: center; justify-content: center;
       }
       #cc-docs-card {
         background: white;
         width: min(95vw, 1000px);
         height: min(90vh, 800px);
         border-radius: 8px;
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
         overflow: hidden;
       }
+      /* WRAPPER SCORRIBILE (fix mobile privacy) */
+      #cc-docs-body {
+        flex: 1;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
       #cc-docs-head {
-        padding: 16px 20px;
-        background: #f5f5f5;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 700;
+        padding: 16px 20px; background: #f5f5f5; border-bottom: 1px solid #ddd;
+        display: flex; justify-content: space-between; align-items: center; font-weight: 700;
       }
       #cc-docs-iframe {
-        flex: 1;
-        border: 0;
-        width: 100%;
+        border: 0; width: 100%; height: 100%; display: block;
       }
       #cc-docs-close {
-        background: #f44336;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        cursor: pointer;
+        background: #f44336; color: white; border: none;
+        padding: 6px 12px; border-radius: 4px; cursor: pointer;
       }
       
       /* Floating button */
       #cc-float {
-        position: fixed;
-        left: 20px;
-        bottom: 20px;
-        z-index: 100004;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: #4caf50;
-        border: none;
+        position: fixed; left: 20px; bottom: 20px; z-index: 100004;
+        width: 56px; height: 56px; border-radius: 50%;
+        background: #4caf50; border: none;
         box-shadow: 0 4px 12px rgba(76,175,80,0.4);
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        justify-content: center;
+        cursor: pointer; display: none; align-items: center; justify-content: center;
       }
-      #cc-float.cc-show {
-        display: flex;
-      }
-      #cc-float img {
-        width: 40px;
-        height: 40px;
-      }
+      #cc-float.cc-show { display: flex; }
+      #cc-float img { width: 40px; height: 40px; }
       
       /* Success notification */
       .cc-success {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #4caf50;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 6px;
-        font-weight: 600;
-        z-index: 100010;
-        transform: translateX(300px);
+        position: fixed; top: 20px; right: 20px;
+        background: #4caf50; color: white; padding: 12px 20px; border-radius: 6px;
+        font-weight: 600; z-index: 100010; transform: translateX(300px);
         transition: transform 0.3s ease;
       }
-      .cc-success.cc-show {
-        transform: translateX(0);
-      }
+      .cc-success.cc-show { transform: translateX(0); }
     `;
 
     var style = document.createElement("style");
@@ -504,7 +354,10 @@
           <span id="cc-docs-title">Informativa</span>
           <button id="cc-docs-close">Chiudi</button>
         </div>
-        <iframe id="cc-docs-iframe"></iframe>
+        <!-- WRAPPER SCORRIBILE -->
+        <div id="cc-docs-body">
+          <iframe id="cc-docs-iframe"></iframe>
+        </div>
       </div>
     `;
 
@@ -520,26 +373,19 @@
       el.style.display = el.id === "cc-modal" || el.id === "cc-docs" ? "flex" : "block";
       setTimeout(() => el.classList.add("cc-show"), 10);
     }
-    
     function hide(el) {
       el.classList.remove("cc-show");
       setTimeout(() => el.style.display = "none", 300);
     }
 
-    function showBanner() {
-      show(banner);
-    }
-    
-    function hideBanner() {
-      hide(banner);
-    }
+    function showBanner() { show(banner); }
+    function hideBanner() { hide(banner); }
     
     function showModal() {
       show(backdrop);
       show(modal);
       hideBanner();
     }
-    
     function hideModal() {
       hide(modal);
       hide(backdrop);
@@ -547,20 +393,19 @@
     
     function showDocs(url, title) {
       document.getElementById("cc-docs-title").textContent = title || "Informativa";
-      document.getElementById("cc-docs-iframe").src = url;
+      // reset src per migliorare compatibilità iOS prima di riassegnare
+      var iframe = document.getElementById("cc-docs-iframe");
+      iframe.removeAttribute("src");
+      setTimeout(function(){ iframe.src = url; }, 0);
       show(docsModal);
       hideBanner();
     }
-    
     function hideDocs() {
       hide(docsModal);
       showBanner();
     }
     
-    function showFloat() {
-      floatBtn.classList.add("cc-show");
-    }
-    
+    function showFloat() { floatBtn.classList.add("cc-show"); }
     function showSuccess(msg) {
       successNotification.textContent = msg;
       successNotification.classList.add("cc-show");
@@ -571,7 +416,6 @@
     function readConsent() {
       var v = getCookie(COOKIE_NAME);
       var res = { marketing: false, statistics: false };
-      
       if (v && v.includes("&")) {
         v.split("&").forEach(function (pair) {
           var kv = pair.split("=");
@@ -583,7 +427,6 @@
           }
         });
       }
-      
       return res;
     }
 
@@ -591,7 +434,6 @@
       var consent = { marketing: !!marketing, statistics: !!statistics };
       setCookie(COOKIE_NAME, `marketing=${consent.marketing}&statistics=${consent.statistics}`, COOKIE_DAYS);
       pushConsentEvent("illow_consenso_aggiornato", consent);
-      
       var m = document.getElementById("cc-marketing");
       var s = document.getElementById("cc-statistics");
       if (m) m.checked = consent.marketing;
@@ -607,21 +449,18 @@
         showFloat();
         hideBanner();
       });
-      
       document.getElementById("cc-reject").addEventListener("click", function () {
         store(false, false);
         showSuccess("Solo cookie necessari attivi");
         showFloat();
         hideBanner();
       });
-      
       document.getElementById("cc-close").addEventListener("click", function () {
         store(false, false);
         showSuccess("Solo cookie necessari attivi");
         showFloat();
         hideBanner();
       });
-      
       document.getElementById("cc-manage").addEventListener("click", function () {
         var consent = readConsent();
         document.getElementById("cc-marketing").checked = consent.marketing;
@@ -639,28 +478,24 @@
         hideModal();
         hideBanner();
       });
-      
       document.getElementById("cc-cancel").addEventListener("click", function () {
         hideModal();
         showBanner();
       });
       
-      // Links
+      // Links (aprono il modale documenti)
       document.getElementById("cc-privacy").addEventListener("click", function (e) {
         e.preventDefault();
         showDocs(PRIVACY_URL, "Info privacy");
       });
-      
       document.getElementById("cc-cookie").addEventListener("click", function (e) {
         e.preventDefault();
         showDocs(COOKIE_URL, "Info cookie");
       });
-      
       document.getElementById("cc-cookie-inline").addEventListener("click", function (e) {
         e.preventDefault();
         showDocs(COOKIE_URL, "Info cookie");
       });
-      
       if (DATA_REQUEST_URL) {
         var dataLink = document.getElementById("cc-data");
         if (dataLink) {
