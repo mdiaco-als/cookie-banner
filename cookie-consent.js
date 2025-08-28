@@ -249,15 +249,18 @@
       #cc-docs-body {
         flex: 1;
         overflow: auto;
-        -webkit-overflow-scrolling: touch;
       }
       #cc-docs-head {
         padding: 16px 20px; background: #f5f5f5; border-bottom: 1px solid #ddd;
         display: flex; justify-content: space-between; align-items: center; font-weight: 700;
       }
       #cc-docs-iframe {
-        border: 0; width: 100%; height: 100%; display: block;
-      }
+  border: 0;
+  width: 100%;
+  height: auto;          /* lasciamo gestire allo script */
+  overflow: hidden;      /* niente scrollbar interne */
+  display: block;
+}
       #cc-docs-close {
         background: #f44336; color: white; border: none;
         padding: 6px 12px; border-radius: 4px; cursor: pointer;
@@ -495,6 +498,27 @@ window.addEventListener('message', function (e) {
     console.warn('[cookie-consent] message handler error:', err);
   }
 });
+// Ridimensiona automaticamente l'iframe dei docs
+function autoResizeIframe(iframe) {
+  if (!iframe) return;
+  try {
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    if (doc && doc.body) {
+      var newHeight = doc.body.scrollHeight;
+      iframe.style.height = newHeight + "px";
+    }
+  } catch (e) {
+    console.warn("[cookie-consent] autoResizeIframe error:", e);
+  }
+}
+
+// Attiva il resize quando l'iframe carica
+var docsIframe = document.getElementById("cc-docs-iframe");
+if (docsIframe) {
+  docsIframe.addEventListener("load", function () {
+    autoResizeIframe(docsIframe);
+  });
+}
 
       // Modal events
       document.getElementById("cc-save").addEventListener("click", function () {
@@ -589,4 +613,5 @@ window.addEventListener('message', function (e) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
