@@ -229,12 +229,14 @@
           gap: 8px;
         }
         
-        /* CORREZIONE: bottoni occupano 50% ciascuno */
+        /* CORREZIONE: bottoni occupano 50% ciascuno - più specifico */
         #cc-primary button {
-          flex: 1;
+          flex: 1 1 50%;
           min-width: 0;
+          width: 100%;
           padding: 12px 8px;
           font-size: 14px;
+          box-sizing: border-box;
         }
         
         #cc-manage {
