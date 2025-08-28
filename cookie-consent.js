@@ -467,7 +467,35 @@
         document.getElementById("cc-statistics").checked = consent.statistics;
         showModal();
       });
-      
+      // Listener per link interni alla Privacy che chiedono switch
+window.addEventListener('message', function (e) {
+  var data = e && e.data;
+  if (!data || data.type !== 'NAVIGATE_MODAL') return;
+
+  try {
+    // sicurezza: accetta solo il tuo dominio
+    var u = new URL(data.url, location.href);
+    if (!/alimentiamolasalute\.org$/i.test(u.hostname.replace(/^www\./,''))) return;
+
+    // aggiorna titolo e iframe
+    var tEl = document.getElementById('cc-docs-title');
+    var ifr = document.getElementById('cc-docs-iframe');
+    if (tEl) tEl.textContent = data.title || 'Informativa';
+    if (ifr) {
+      ifr.removeAttribute('src');       // reset per iOS
+      setTimeout(() => ifr.src = u.href, 0);
+    }
+
+    // assicura che il modale resti visibile
+    if (docsModal && docsModal.style.display !== 'flex') {
+      show(docsModal);
+      hideBanner();
+    }
+  } catch (err) {
+    console.warn('[cookie-consent] message handler error:', err);
+  }
+});
+
       // Modal events
       document.getElementById("cc-save").addEventListener("click", function () {
         var m = document.getElementById("cc-marketing").checked;
@@ -561,3 +589,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
