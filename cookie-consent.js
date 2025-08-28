@@ -201,7 +201,7 @@
         color: #333;
       }
       
-      /* MOBILE - layout verticale con bottoni 50% */
+      /* MOBILE - layout verticale con bottoni 50% (MODIFICA RICHIESTA) */
       @media (max-width: 768px) {
         #cc-container {
           flex-direction: column;
@@ -222,14 +222,16 @@
         #cc-buttons {
           flex-direction: column;
           gap: 8px;
+          width: 100%; /* prende tutta la larghezza */
         }
         
         #cc-primary {
           display: flex;
           gap: 8px;
+          width: 100%; /* riga piena */
         }
         
-        /* CORREZIONE: bottoni occupano 50% ciascuno - più specifico */
+        /* Bottoni che si espandono: 50% ciascuno e full width */
         #cc-primary button {
           flex: 1 1 50%;
           min-width: 0;
