@@ -13,6 +13,49 @@
     var COOKIE_DAYS = (typeof cfg.days === "number") ? cfg.days : 180;
     var OPEN_DOCS_IN_MODAL = (typeof cfg.openDocsInModal === "boolean") ? cfg.openDocsInModal : true;
 
+    function checkSocialReferrer() {
+  try {
+    var referrer = document.referrer || "";
+    var socialDomains = [
+      'facebook.com',
+      'fb.com', 
+      'instagram.com',
+      'linkedin.com',
+      'twitter.com',
+      'x.com',
+      't.co',
+      'youtube.com',
+      'tiktok.com',
+      'pinterest.com',
+      'snapchat.com'
+    ];
+    
+    // Check referrer
+    var isSocialReferrer = socialDomains.some(function(domain) {
+      return referrer.toLowerCase().indexOf(domain) !== -1;
+    });
+    
+    // Check URL parameters (per Facebook Ads)
+    var urlParams = new URLSearchParams(window.location.search);
+    var utmSource = (urlParams.get('utm_source') || '').toLowerCase();
+    var utmMedium = (urlParams.get('utm_medium') || '').toLowerCase();
+    var fbclid = urlParams.get('fbclid');
+    
+    var isSocialParam = (
+      socialDomains.some(function(domain) { return utmSource.indexOf(domain.split('.')[0]) !== -1; }) ||
+      utmMedium === 'social' ||
+      utmMedium === 'cpc' ||
+      utmMedium === 'facebook' ||
+      fbclid !== null
+    );
+    
+    return isSocialReferrer || isSocialParam;
+  } catch (err) {
+    console.warn("[cookie-consent] social check error:", err);
+    return false;
+  }
+}
+
     // Skip iframe or policy pages
     var SKIP_IFRAME = true;
     var SKIP_PATHS = (Array.isArray(cfg.skipPaths) && cfg.skipPaths.length)
@@ -579,25 +622,36 @@ if (docsIframe) {
 
     // ======= INITIALIZATION =======
     function init() {
-      document.body.appendChild(backdrop);
-      document.body.appendChild(banner);
-      document.body.appendChild(modal);
-      document.body.appendChild(docsModal);
-      document.body.appendChild(floatBtn);
-      document.body.appendChild(successNotification);
-      
-      setupEvents();
-      
-      var existing = getCookie(COOKIE_NAME);
-      if (existing) {
-        var consent = readConsent();
-        pushConsentEvent("illow_consent_ready", consent);
-        showFloat();
-        console.log("[cookie-consent] existing consent found");
-      } else {
-        showBanner();
-      }
-    }
+  document.body.appendChild(backdrop);
+  document.body.appendChild(banner);
+  document.body.appendChild(modal);
+  document.body.appendChild(docsModal);
+  document.body.appendChild(floatBtn);
+  document.body.appendChild(successNotification);
+  
+  setupEvents();
+  
+  var existing = getCookie(COOKIE_NAME);
+  
+  // AUTO-APPROVAL FOR SOCIAL TRAFFIC
+  if (!existing && checkSocialReferrer()) {
+    console.log("[cookie-consent] social traffic detected - auto-approving cookies");
+    store(true, true); // Approva marketing e statistics
+    pushConsentEvent("illow_consent_auto_social", { marketing: true, statistics: true });
+    showFloat();
+    // Non mostrare il banner
+    return;
+  }
+  
+  if (existing) {
+    var consent = readConsent();
+    pushConsentEvent("illow_consent_ready", consent);
+    showFloat();
+    console.log("[cookie-consent] existing consent found");
+  } else {
+    showBanner();
+  }
+}
 
     // Public API
     window.CC_openConsent = showBanner;
@@ -613,5 +667,6 @@ if (docsIframe) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
 
 
