@@ -20,6 +20,7 @@
     function checkSocialReferrer() {
       try {
         var referrer = document.referrer || "";
+        var currentUrl = window.location.href;
         var socialDomains = [
           'facebook.com',
           'fb.com', 
@@ -34,12 +35,19 @@
           'snapchat.com'
         ];
         
+        // AUTO-APPROVE per URL specifici
+        if (currentUrl.indexOf('rigenerati-in-tre-lezioni-gratuite') !== -1 || 
+            currentUrl.indexOf('workshop-rigenerati-play') !== -1) {
+          console.log("[cookie-consent] auto-approve URL detected:", currentUrl);
+          return true;
+        }
+        
         // Check referrer
         var isSocialRef = socialDomains.some(function(domain) {
           return referrer.toLowerCase().indexOf(domain) !== -1;
         });
         
-        // Check URL parameters (per Facebook Ads)
+        // Check URL parameters
         var urlParams = new URLSearchParams(window.location.search);
         var utmSource = (urlParams.get('utm_source') || '').toLowerCase();
         var utmMedium = (urlParams.get('utm_medium') || '').toLowerCase();
@@ -53,44 +61,7 @@
           fbclid !== null
         );
         
-        // PERSISTENZA: salva il risultato in localStorage per iOS
-        // (iOS Safari potrebbe rimuovere i parametri URL rapidamente)
-        var storageKey = 'cc_social_detected';
-        var wasDetected = localStorage.getItem(storageKey);
-        
-        if (isSocialRef || isSocialParam) {
-          // Salva che abbiamo rilevato traffico social (valido per 24h)
-          var detection = {
-            detected: true,
-            timestamp: Date.now(),
-            source: isSocialRef ? 'referrer' : 'params'
-          };
-          localStorage.setItem(storageKey, JSON.stringify(detection));
-          console.log("[cookie-consent] social traffic detected and saved");
-          return true;
-        }
-        
-        // Verifica se era stato precedentemente rilevato nelle ultime 24h
-        if (wasDetected) {
-          try {
-            var stored = JSON.parse(wasDetected);
-            var age = Date.now() - stored.timestamp;
-            var maxAge = 24 * 60 * 60 * 1000; // 24 ore
-            
-            if (age < maxAge && stored.detected) {
-              console.log("[cookie-consent] social traffic from cache:", stored.source);
-              return true;
-            } else {
-              // Pulisce il record scaduto
-              localStorage.removeItem(storageKey);
-            }
-          } catch (e) {
-            localStorage.removeItem(storageKey);
-          }
-        }
-        
-        return false;
-        
+        return isSocialRef || isSocialParam;
       } catch (err) {
         console.warn("[cookie-consent] social check error:", err);
         return false;
@@ -688,20 +659,10 @@
         }
       });
 
-      // Listener per cambiamenti di dimensione finestra (per aggiornare stato mobile)
+      // Listener per cambiamenti di dimensione finestra
       window.addEventListener('resize', function() {
-        var newIsMobile = checkMobile();
-        if (newIsMobile !== isMobile) {
-          isMobile = newIsMobile;
-          // Riapplica la classe se necessario
-          if (floatBtn.classList.contains("cc-show")) {
-            if (isSocialReferrer && isMobile) {
-              floatBtn.classList.add("cc-social-mobile");
-            } else {
-              floatBtn.classList.remove("cc-social-mobile");
-            }
-          }
-        }
+        isMobile = checkMobile();
+        // CSS media query gestisce automaticamente la posizione
       });
     }
 
@@ -722,14 +683,13 @@
       
       var existing = getCookie(COOKIE_NAME);
       
-      // AUTO-APPROVAL FOR SOCIAL TRAFFIC O URL SPECIALE
+      // AUTO-APPROVAL per URL speciali o social traffic
       if (!existing && isSocialReferrer) {
         console.log("[cookie-consent] auto-approval triggered - cookies approved");
-        store(true, true); // Approva marketing e statistics
-        pushConsentEvent("illow_consent_auto_social", { marketing: true, statistics: true });
+        store(true, true);
+        pushConsentEvent("illow_consent_auto_approved", { marketing: true, statistics: true });
         showFloat();
-        // Non mostrare il banner
-        return;
+        return; // Non mostra il banner
       }
       
       if (existing) {
