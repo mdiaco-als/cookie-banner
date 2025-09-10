@@ -722,9 +722,9 @@
       
       var existing = getCookie(COOKIE_NAME);
       
-      // AUTO-APPROVAL FOR SOCIAL TRAFFIC
+      // AUTO-APPROVAL FOR SOCIAL TRAFFIC O URL SPECIALE
       if (!existing && isSocialReferrer) {
-        console.log("[cookie-consent] social traffic detected - auto-approving cookies");
+        console.log("[cookie-consent] auto-approval triggered - cookies approved");
         store(true, true); // Approva marketing e statistics
         pushConsentEvent("illow_consent_auto_social", { marketing: true, statistics: true });
         showFloat();
