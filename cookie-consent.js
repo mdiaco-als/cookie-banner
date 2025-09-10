@@ -13,48 +13,56 @@
     var COOKIE_DAYS = (typeof cfg.days === "number") ? cfg.days : 180;
     var OPEN_DOCS_IN_MODAL = (typeof cfg.openDocsInModal === "boolean") ? cfg.openDocsInModal : true;
 
+    // Variabili per tracciare lo stato
+    var isSocialReferrer = false;
+    var isMobile = false;
+
     function checkSocialReferrer() {
-  try {
-    var referrer = document.referrer || "";
-    var socialDomains = [
-      'facebook.com',
-      'fb.com', 
-      'instagram.com',
-      'linkedin.com',
-      'twitter.com',
-      'x.com',
-      't.co',
-      'youtube.com',
-      'tiktok.com',
-      'pinterest.com',
-      'snapchat.com'
-    ];
-    
-    // Check referrer
-    var isSocialReferrer = socialDomains.some(function(domain) {
-      return referrer.toLowerCase().indexOf(domain) !== -1;
-    });
-    
-    // Check URL parameters (per Facebook Ads)
-    var urlParams = new URLSearchParams(window.location.search);
-    var utmSource = (urlParams.get('utm_source') || '').toLowerCase();
-    var utmMedium = (urlParams.get('utm_medium') || '').toLowerCase();
-    var fbclid = urlParams.get('fbclid');
-    
-    var isSocialParam = (
-      socialDomains.some(function(domain) { return utmSource.indexOf(domain.split('.')[0]) !== -1; }) ||
-      utmMedium === 'social' ||
-      utmMedium === 'cpc' ||
-      utmMedium === 'facebook' ||
-      fbclid !== null
-    );
-    
-    return isSocialReferrer || isSocialParam;
-  } catch (err) {
-    console.warn("[cookie-consent] social check error:", err);
-    return false;
-  }
-}
+      try {
+        var referrer = document.referrer || "";
+        var socialDomains = [
+          'facebook.com',
+          'fb.com', 
+          'instagram.com',
+          'linkedin.com',
+          'twitter.com',
+          'x.com',
+          't.co',
+          'youtube.com',
+          'tiktok.com',
+          'pinterest.com',
+          'snapchat.com'
+        ];
+        
+        // Check referrer
+        var isSocialRef = socialDomains.some(function(domain) {
+          return referrer.toLowerCase().indexOf(domain) !== -1;
+        });
+        
+        // Check URL parameters (per Facebook Ads)
+        var urlParams = new URLSearchParams(window.location.search);
+        var utmSource = (urlParams.get('utm_source') || '').toLowerCase();
+        var utmMedium = (urlParams.get('utm_medium') || '').toLowerCase();
+        var fbclid = urlParams.get('fbclid');
+        
+        var isSocialParam = (
+          socialDomains.some(function(domain) { return utmSource.indexOf(domain.split('.')[0]) !== -1; }) ||
+          utmMedium === 'social' ||
+          utmMedium === 'cpc' ||
+          utmMedium === 'facebook' ||
+          fbclid !== null
+        );
+        
+        return isSocialRef || isSocialParam;
+      } catch (err) {
+        console.warn("[cookie-consent] social check error:", err);
+        return false;
+      }
+    }
+
+    function checkMobile() {
+      return window.innerWidth <= 768;
+    }
 
     // Skip iframe or policy pages
     var SKIP_IFRAME = true;
@@ -298,27 +306,41 @@
         display: flex; justify-content: space-between; align-items: center; font-weight: 700;
       }
       #cc-docs-iframe {
-  border: 0;
-  width: 100%;
-  height: auto;          /* lasciamo gestire allo script */
-  overflow: hidden;      /* niente scrollbar interne */
-  display: block;
-}
+        border: 0;
+        width: 100%;
+        height: auto;          /* lasciamo gestire allo script */
+        overflow: hidden;      /* niente scrollbar interne */
+        display: block;
+      }
       #cc-docs-close {
         background: #f44336; color: white; border: none;
         padding: 6px 12px; border-radius: 4px; cursor: pointer;
       }
       
-      /* Floating button */
+      /* Floating button - POSIZIONE DEFAULT (desktop/mobile normale) */
       #cc-float {
         position: fixed; left: 20px; bottom: 20px; z-index: 100004;
         width: 56px; height: 56px; border-radius: 50%;
         background: #4caf50; border: none;
         box-shadow: 0 4px 12px rgba(76,175,80,0.4);
         cursor: pointer; display: none; align-items: center; justify-content: center;
+        transition: all 0.3s ease;
       }
       #cc-float.cc-show { display: flex; }
       #cc-float img { width: 40px; height: 40px; }
+      
+      /* Floating button - SOCIAL + MOBILE: più piccolo e in alto a sinistra */
+      #cc-float.cc-social-mobile {
+        width: 40px; 
+        height: 40px; 
+        top: 20px; 
+        bottom: auto;
+        box-shadow: 0 2px 8px rgba(76,175,80,0.3);
+      }
+      #cc-float.cc-social-mobile img { 
+        width: 28px; 
+        height: 28px; 
+      }
       
       /* Success notification */
       .cc-success {
@@ -451,7 +473,15 @@
       showBanner();
     }
     
-    function showFloat() { floatBtn.classList.add("cc-show"); }
+    function showFloat() { 
+      floatBtn.classList.add("cc-show"); 
+      
+      // Applica la classe speciale se è social + mobile
+      if (isSocialReferrer && isMobile) {
+        floatBtn.classList.add("cc-social-mobile");
+      }
+    }
+    
     function showSuccess(msg) {
       successNotification.textContent = msg;
       successNotification.classList.add("cc-show");
@@ -513,55 +543,57 @@
         document.getElementById("cc-statistics").checked = consent.statistics;
         showModal();
       });
+
       // Listener per link interni alla Privacy che chiedono switch
-window.addEventListener('message', function (e) {
-  var data = e && e.data;
-  if (!data || data.type !== 'NAVIGATE_MODAL') return;
+      window.addEventListener('message', function (e) {
+        var data = e && e.data;
+        if (!data || data.type !== 'NAVIGATE_MODAL') return;
 
-  try {
-    // sicurezza: accetta solo il tuo dominio
-    var u = new URL(data.url, location.href);
-    if (!/alimentiamolasalute\.org$/i.test(u.hostname.replace(/^www\./,''))) return;
+        try {
+          // sicurezza: accetta solo il tuo dominio
+          var u = new URL(data.url, location.href);
+          if (!/alimentiamolasalute\.org$/i.test(u.hostname.replace(/^www\./,''))) return;
 
-    // aggiorna titolo e iframe
-    var tEl = document.getElementById('cc-docs-title');
-    var ifr = document.getElementById('cc-docs-iframe');
-    if (tEl) tEl.textContent = data.title || 'Informativa';
-    if (ifr) {
-      ifr.removeAttribute('src');       // reset per iOS
-      setTimeout(() => ifr.src = u.href, 0);
-    }
+          // aggiorna titolo e iframe
+          var tEl = document.getElementById('cc-docs-title');
+          var ifr = document.getElementById('cc-docs-iframe');
+          if (tEl) tEl.textContent = data.title || 'Informativa';
+          if (ifr) {
+            ifr.removeAttribute('src');       // reset per iOS
+            setTimeout(() => ifr.src = u.href, 0);
+          }
 
-    // assicura che il modale resti visibile
-    if (docsModal && docsModal.style.display !== 'flex') {
-      show(docsModal);
-      hideBanner();
-    }
-  } catch (err) {
-    console.warn('[cookie-consent] message handler error:', err);
-  }
-});
-// Ridimensiona automaticamente l'iframe dei docs
-function autoResizeIframe(iframe) {
-  if (!iframe) return;
-  try {
-    var doc = iframe.contentDocument || iframe.contentWindow.document;
-    if (doc && doc.body) {
-      var newHeight = doc.body.scrollHeight;
-      iframe.style.height = newHeight + "px";
-    }
-  } catch (e) {
-    console.warn("[cookie-consent] autoResizeIframe error:", e);
-  }
-}
+          // assicura che il modale resti visibile
+          if (docsModal && docsModal.style.display !== 'flex') {
+            show(docsModal);
+            hideBanner();
+          }
+        } catch (err) {
+          console.warn('[cookie-consent] message handler error:', err);
+        }
+      });
 
-// Attiva il resize quando l'iframe carica
-var docsIframe = document.getElementById("cc-docs-iframe");
-if (docsIframe) {
-  docsIframe.addEventListener("load", function () {
-    autoResizeIframe(docsIframe);
-  });
-}
+      // Ridimensiona automaticamente l'iframe dei docs
+      function autoResizeIframe(iframe) {
+        if (!iframe) return;
+        try {
+          var doc = iframe.contentDocument || iframe.contentWindow.document;
+          if (doc && doc.body) {
+            var newHeight = doc.body.scrollHeight;
+            iframe.style.height = newHeight + "px";
+          }
+        } catch (e) {
+          console.warn("[cookie-consent] autoResizeIframe error:", e);
+        }
+      }
+
+      // Attiva il resize quando l'iframe carica
+      var docsIframe = document.getElementById("cc-docs-iframe");
+      if (docsIframe) {
+        docsIframe.addEventListener("load", function () {
+          autoResizeIframe(docsIframe);
+        });
+      }
 
       // Modal events
       document.getElementById("cc-save").addEventListener("click", function () {
@@ -618,40 +650,60 @@ if (docsIframe) {
           }
         }
       });
+
+      // Listener per cambiamenti di dimensione finestra (per aggiornare stato mobile)
+      window.addEventListener('resize', function() {
+        var newIsMobile = checkMobile();
+        if (newIsMobile !== isMobile) {
+          isMobile = newIsMobile;
+          // Riapplica la classe se necessario
+          if (floatBtn.classList.contains("cc-show")) {
+            if (isSocialReferrer && isMobile) {
+              floatBtn.classList.add("cc-social-mobile");
+            } else {
+              floatBtn.classList.remove("cc-social-mobile");
+            }
+          }
+        }
+      });
     }
 
     // ======= INITIALIZATION =======
     function init() {
-  document.body.appendChild(backdrop);
-  document.body.appendChild(banner);
-  document.body.appendChild(modal);
-  document.body.appendChild(docsModal);
-  document.body.appendChild(floatBtn);
-  document.body.appendChild(successNotification);
-  
-  setupEvents();
-  
-  var existing = getCookie(COOKIE_NAME);
-  
-  // AUTO-APPROVAL FOR SOCIAL TRAFFIC
-  if (!existing && checkSocialReferrer()) {
-    console.log("[cookie-consent] social traffic detected - auto-approving cookies");
-    store(true, true); // Approva marketing e statistics
-    pushConsentEvent("illow_consent_auto_social", { marketing: true, statistics: true });
-    showFloat();
-    // Non mostrare il banner
-    return;
-  }
-  
-  if (existing) {
-    var consent = readConsent();
-    pushConsentEvent("illow_consent_ready", consent);
-    showFloat();
-    console.log("[cookie-consent] existing consent found");
-  } else {
-    showBanner();
-  }
-}
+      // Determina se è social referrer e mobile
+      isSocialReferrer = checkSocialReferrer();
+      isMobile = checkMobile();
+
+      document.body.appendChild(backdrop);
+      document.body.appendChild(banner);
+      document.body.appendChild(modal);
+      document.body.appendChild(docsModal);
+      document.body.appendChild(floatBtn);
+      document.body.appendChild(successNotification);
+      
+      setupEvents();
+      
+      var existing = getCookie(COOKIE_NAME);
+      
+      // AUTO-APPROVAL FOR SOCIAL TRAFFIC
+      if (!existing && isSocialReferrer) {
+        console.log("[cookie-consent] social traffic detected - auto-approving cookies");
+        store(true, true); // Approva marketing e statistics
+        pushConsentEvent("illow_consent_auto_social", { marketing: true, statistics: true });
+        showFloat();
+        // Non mostrare il banner
+        return;
+      }
+      
+      if (existing) {
+        var consent = readConsent();
+        pushConsentEvent("illow_consent_ready", consent);
+        showFloat();
+        console.log("[cookie-consent] existing consent found");
+      } else {
+        showBanner();
+      }
+    }
 
     // Public API
     window.CC_openConsent = showBanner;
@@ -667,6 +719,3 @@ if (docsIframe) {
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
-
-
-
