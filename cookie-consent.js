@@ -53,7 +53,44 @@
           fbclid !== null
         );
         
-        return isSocialRef || isSocialParam;
+        // PERSISTENZA: salva il risultato in localStorage per iOS
+        // (iOS Safari potrebbe rimuovere i parametri URL rapidamente)
+        var storageKey = 'cc_social_detected';
+        var wasDetected = localStorage.getItem(storageKey);
+        
+        if (isSocialRef || isSocialParam) {
+          // Salva che abbiamo rilevato traffico social (valido per 24h)
+          var detection = {
+            detected: true,
+            timestamp: Date.now(),
+            source: isSocialRef ? 'referrer' : 'params'
+          };
+          localStorage.setItem(storageKey, JSON.stringify(detection));
+          console.log("[cookie-consent] social traffic detected and saved");
+          return true;
+        }
+        
+        // Verifica se era stato precedentemente rilevato nelle ultime 24h
+        if (wasDetected) {
+          try {
+            var stored = JSON.parse(wasDetected);
+            var age = Date.now() - stored.timestamp;
+            var maxAge = 24 * 60 * 60 * 1000; // 24 ore
+            
+            if (age < maxAge && stored.detected) {
+              console.log("[cookie-consent] social traffic from cache:", stored.source);
+              return true;
+            } else {
+              // Pulisce il record scaduto
+              localStorage.removeItem(storageKey);
+            }
+          } catch (e) {
+            localStorage.removeItem(storageKey);
+          }
+        }
+        
+        return false;
+        
       } catch (err) {
         console.warn("[cookie-consent] social check error:", err);
         return false;
