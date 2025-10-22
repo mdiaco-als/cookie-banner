@@ -37,7 +37,8 @@
         
         // AUTO-APPROVE per URL specifici
         if (currentUrl.indexOf('rigenerati-in-tre-lezioni-gratuite') !== -1 || 
-            currentUrl.indexOf('workshop-rigenerati-play') !== -1) {
+            currentUrl.indexOf('workshop-rigenerati-play') !== -1 ||
+            currentUrl.indexOf('prenota-consulenza-gratuita') !== -1) {
           console.log("[cookie-consent] auto-approve URL detected:", currentUrl);
           return true;
         }
@@ -716,3 +717,4 @@
     console.error("[cookie-consent] fatal error:", err);
   }
 })();
+
